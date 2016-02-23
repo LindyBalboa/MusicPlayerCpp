@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html dir="ltr" class="client-js" lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>GenerateLibFromDll - VideoLAN Wiki</title>
+<meta charset="UTF-8">
+<meta name="generator" content="MediaWiki 1.20.7">
+<link rel="shortcut icon" href="https://images.videolan.org/images/icons/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="https://wiki.videolan.org/opensearch_desc.php" title="VideoLAN Wiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.videolan.org/api.php?action=rsd">
+<link rel="alternate" type="application/atom+xml" title="VideoLAN Wiki Atom feed" href="https://wiki.videolan.org/index.php?title=Special:RecentChanges&amp;feed=atom">
+<link rel="stylesheet" href="dll_to_lib_files/load.css">
+<style>.mw-collapsible-toggle{float:right} li .mw-collapsible-toggle{float:none} .mw-collapsible-toggle-li{list-style:none}
+/* cache key: VideoLANwikidb:resourceloader:filter:minify-css:7:4250852ed2349a0d4d0fc6509a3e7d4c */.suggestions{overflow:hidden;position:absolute;top:0;left:0;width:0;border:none;z-index:1099;padding:0;margin:-1px -1px 0 0} html > body .suggestions{margin:-1px 0 0 0}.suggestions-special{position:relative;background-color:white;cursor:pointer;border:solid 1px #aaaaaa;padding:0;margin:0;margin-top:-2px;display:none;padding:0.25em 0.25em;line-height:1.25em}.suggestions-results{background-color:white;cursor:pointer;border:solid 1px #aaaaaa;padding:0;margin:0}.suggestions-result{color:black;margin:0;line-height:1.5em;padding:0.01em 0.25em;text-align:left}.suggestions-result-current{background-color:#4C59A6;color:white}.suggestions-special .special-label{color:gray;text-align:left}.suggestions-special .special-query{color:black;font-style:italic;text-align:left}.suggestions-special .special-hover{background-color:silver}.suggestions-result-current .special-label,.suggestions-result-current .special-query{color:white}.autoellipsis-matched,.highlight{font-weight:bold}
+/* cache key: VideoLANwikidb:resourceloader:filter:minify-css:7:9780324491b653a3780e2d029bdc140c */</style><meta name="ResourceLoaderDynamicStyles" content="">
+<link rel="stylesheet" href="dll_to_lib_files/load_002.css">
+<style>a:lang(ar),a:lang(ckb),a:lang(fa),a:lang(kk-arab),a:lang(mzn),a:lang(ps),a:lang(ur){text-decoration:none}
+/* cache key: VideoLANwikidb:resourceloader:filter:minify-css:7:f29f747a68cdef699a6b0efd904ddda4 */</style>
+
+<script src="dll_to_lib_files/load.php"></script><style>.sponsor_img,
+.sponsor,
+.pub_text
+{display:none !important;}</style><script src="dll_to_lib_files/load_006.php"></script>
+<script>if(window.mw){
+mw.config.set({"wgCanonicalNamespace":"","wgCanonicalSpecialPageName":false,"wgNamespaceNumber":0,"wgPageName":"GenerateLibFromDll","wgTitle":"GenerateLibFromDll","wgCurRevisionId":26645,"wgArticleId":3800,"wgIsArticle":true,"wgAction":"view","wgUserName":null,"wgUserGroups":["*"],"wgCategories":["LibVLC"],"wgBreakFrames":false,"wgPageContentLanguage":"en","wgSeparatorTransformTable":["",""],"wgDigitTransformTable":["",""],"wgDefaultDateFormat":"dmy","wgMonthNames":["","January","February","March","April","May","June","July","August","September","October","November","December"],"wgMonthNamesShort":["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],"wgRelevantPageName":"GenerateLibFromDll","wgRestrictionEdit":[],"wgRestrictionMove":[],"wgWikiEditorEnabledModules":{"toolbar":true,"dialogs":true,"hidesig":true,"templateEditor":false,"templates":false,"preview":true,"previewDialog":false,"publish":false,"toc":false}});
+}</script><script>if(window.mw){
+mw.loader.implement("user.options",function(){mw.user.options.set({"ccmeonemails":0,"cols":80,"date":"default","diffonly":0,"disablemail":0,"disablesuggest":0,"editfont":"default","editondblclick":0,"editsection":1,"editsectiononrightclick":0,"enotifminoredits":0,"enotifrevealaddr":0,"enotifusertalkpages":1,"enotifwatchlistpages":0,"extendwatchlist":0,"externaldiff":0,"externaleditor":0,"fancysig":0,"forceeditsummary":0,"gender":"unknown","hideminor":0,"hidepatrolled":0,"imagesize":2,"justify":0,"math":1,"minordefault":0,"newpageshidepatrolled":0,"nocache":0,"noconvertlink":0,"norollbackdiff":0,"numberheadings":0,"previewonfirst":0,"previewontop":1,"quickbar":5,"rcdays":7,"rclimit":50,"rememberpassword":0,"rows":25,"searchlimit":20,"showhiddencats":0,"showjumplinks":1,"shownumberswatching":1,"showtoc":1,"showtoolbar":1,"skin":"vector","stubthreshold":0,"thumbsize":2,"underline":2,"uselivepreview":0,"usenewrc":0,"watchcreations":0,"watchdefault":0,"watchdeletion":0,"watchlistdays":3,
+"watchlisthideanons":0,"watchlisthidebots":0,"watchlisthideliu":0,"watchlisthideminor":0,"watchlisthideown":0,"watchlisthidepatrolled":0,"watchmoves":0,"wllimit":250,"usebetatoolbar":1,"usebetatoolbar-cgd":1,"wikieditor-preview":1,"variant":"en","language":"en","searchNs0":true,"searchNs1":false,"searchNs2":false,"searchNs3":false,"searchNs4":false,"searchNs5":false,"searchNs6":false,"searchNs7":false,"searchNs8":false,"searchNs9":false,"searchNs10":false,"searchNs11":false,"searchNs12":false,"searchNs13":false,"searchNs14":false,"searchNs15":false,"searchNs100":true,"searchNs101":false,"searchNs102":false,"searchNs103":false});;},{},{});mw.loader.implement("user.tokens",function(){mw.user.tokens.set({"editToken":"+\\","watchToken":false});;},{},{});
+/* cache key: VideoLANwikidb:resourceloader:filter:minify-js:7:debb97d00295f76189384f470c7aa9f3 */
+}</script>
+<script>if(window.mw){
+mw.loader.load(["mediawiki.page.startup","mediawiki.legacy.wikibits","mediawiki.legacy.ajax"]);
+}</script><script type="text/javascript" src="dll_to_lib_files/load_003.php"></script>
+<!--[if lt IE 7]><style type="text/css">body{behavior:url("/skins/vector/csshover.min.htc")}</style><![endif]-->		<style type="text/css">
+		li#pt-openidlogin {
+		  background: url(/extensions/OpenID/skin/icons/openid-inputicon.png) top left no-repeat;
+		  padding-left: 20px;
+		  text-transform: none;
+		}
+		</style></head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-GenerateLibFromDll skin-vector action-view vector-animateLayout">
+		<div id="mw-page-base" class="noprint"></div>
+		<div id="mw-head-base" class="noprint"></div>
+		<!-- content -->
+		<div id="content" class="mw-body">
+			<a id="top"></a>
+			<div id="mw-js-message" style="display:none;"></div>
+						<!-- firstHeading -->
+			<h1 id="firstHeading" class="firstHeading"><span dir="auto">GenerateLibFromDll</span></h1>
+			<!-- /firstHeading -->
+			<!-- bodyContent -->
+			<div id="bodyContent">
+								<!-- tagline -->
+				<div id="siteSub">From VideoLAN Wiki</div>
+				<!-- /tagline -->
+								<!-- subtitle -->
+				<div id="contentSub"></div>
+				<!-- /subtitle -->
+																<!-- jumpto -->
+				<div id="jump-to-nav" class="mw-jump">
+					Jump to:					<a href="#mw-head">navigation</a>, 					<a href="#p-search">search</a>
+				</div>
+				<!-- /jumpto -->
+								<!-- bodycontent -->
+				<div id="mw-content-text" dir="ltr" class="mw-content-ltr" lang="en"><p>from: <a rel="nofollow" class="external free" href="http://www.coderetard.com/2009/01/21/generate-a-lib-from-a-dll-with-visual-studio/">http://www.coderetard.com/2009/01/21/generate-a-lib-from-a-dll-with-visual-studio/</a>
+</p>
+<table id="toc" class="toc"><tbody><tr><td><div id="toctitle"><h2>Contents</h2><span class="toctoggle">&nbsp;[<a href="#" class="internal" id="togglelink">hide</a>]&nbsp;</span></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Introduction"><span class="tocnumber">1</span> <span class="toctext">Introduction</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Open_a_Command_Prompt"><span class="tocnumber">2</span> <span class="toctext">Open a Command Prompt</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Extract_Symbols"><span class="tocnumber">3</span> <span class="toctext">Extract Symbols</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Generate_the_.lib"><span class="tocnumber">4</span> <span class="toctext">Generate the .lib</span></a></li>
+</ul>
+</td></tr></tbody></table>
+<h2> <span class="mw-headline" id="Introduction"> Introduction </span></h2>
+<p>To avoid installing and fighting against MSYS and Cygwin, you can just extract
+exported symbols from libvlc.dll to generate a .lib (libvlc.lib) and link your program against it.
+And all of this using only with Microsoft Visual Studio Tools!
+</p><p>In case you don't have Visual Studio you can download the free version here <a rel="nofollow" class="external text" href="http://www.microsoft.com/express/download">Visual Studio Express</a>.
+</p>
+<h2> <span class="mw-headline" id="Open_a_Command_Prompt"> Open a Command Prompt </span></h2>
+<p>It can be found within the Visual Studio Tools menu entry: Start / 
+Program Files / Microsoft Visual Studio / Visual Studio Tools / Visual 
+Studio Command Prompt.
+</p>
+<h2> <span class="mw-headline" id="Extract_Symbols"> Extract Symbols  </span></h2>
+<p>Within the command prompt type: 
+</p>
+<pre>dumpbin /exports "C:\Program Files\VideoLAN\VLC\libvlc.dll" &gt; "C:\Program Files\VideoLAN\VLC\libvlc.def"
+</pre>
+<p>Edit the libvlc.def file and modify it to get something like this: 
+</p>
+<pre>EXPORTS
+libvlc_add_intf
+libvlc_audio_get_channel
+libvlc_audio_get_mute
+libvlc_audio_get_track
+libvlc_audio_get_track_count
+libvlc_audio_get_track_description
+libvlc_audio_get_volume
+...
+</pre>
+<p>Alternatively, the following command will automatically generate the DEF file:
+</p>
+<pre>echo EXPORTS &gt; libvlc.def
+for /f "usebackq tokens=4,* delims=_ "&nbsp;%i in (`dumpbin /exports "c:\Program Files\VideoLan\VLC\libvlc.dll"`) do if&nbsp;%i==libvlc echo&nbsp;%i_%j &gt;&gt; libvlc.def
+</pre>
+<h2> <span class="mw-headline" id="Generate_the_.lib"> Generate the .lib </span></h2>
+<p>Still within the command prompt type:
+</p>
+<pre>lib /def:"C:\Program Files\VideoLAN\VLC\libvlc.def" /out:"C:\Program Files\VideoLAN\VLC\libvlc.lib" /machine:x86
+</pre>
+<p>Of course, you'll need to adapt the path according to your configuration.
+</p><p>Et voila! You have it, now you can link against libvlc.lib in your program :-)
+</p>
+<!-- 
+NewPP limit report
+Preprocessor visited node count: 18/1000000
+Preprocessor generated node count: 40/1000000
+Post‐expand include size: 0/2097152 bytes
+Template argument size: 0/2097152 bytes
+Highest expansion depth: 2/40
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key VideoLANwikidb:pcache:idhash:3800-0!*!*!!en!*!* and timestamp 20160219145424 -->
+</div>				<!-- /bodycontent -->
+								<!-- printfooter -->
+				<div class="printfooter">
+				Retrieved from "<a href="https://wiki.videolan.org/index.php?title=GenerateLibFromDll&amp;oldid=26645">https://wiki.videolan.org/index.php?title=GenerateLibFromDll&amp;oldid=26645</a>"				</div>
+				<!-- /printfooter -->
+												<!-- catlinks -->
+				<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks"><a href="https://wiki.videolan.org/Special:Categories/" title="Special:Categories">Category</a>: <ul><li><a href="https://wiki.videolan.org/Category:LibVLC/" title="Category:LibVLC">LibVLC</a></li></ul></div></div>				<!-- /catlinks -->
+												<div class="visualClear"></div>
+				<!-- debughtml -->
+								<!-- /debughtml -->
+			</div>
+			<!-- /bodyContent -->
+		</div>
+		<!-- /content -->
+		<!-- header -->
+		<div id="mw-head" class="noprint">
+			
+<!-- 0 -->
+<div id="p-personal" class="">
+	<h5>Personal tools</h5>
+	<ul>
+		<li id="pt-login"><a href="https://wiki.videolan.org/index.php?title=Special:UserLogin&amp;returnto=GenerateLibFromDll" title="Log in to edit pages [alt-shift-o]" accesskey="o">Log in</a></li>
+		<li id="pt-openidlogin"><a href="https://wiki.videolan.org/index.php?title=Special:OpenIDLogin&amp;returnto=GenerateLibFromDll">Login with OpenID</a></li>
+	</ul>
+</div>
+
+<!-- /0 -->
+			<div id="left-navigation">
+				
+<!-- 0 -->
+<div id="p-namespaces" class="vectorTabs">
+	<h5>Namespaces</h5>
+	<ul>
+					<li id="ca-nstab-main" class="selected"><span><a href="https://wiki.videolan.org/GenerateLibFromDll/" title="View the content page [alt-shift-c]" accesskey="c">Page</a></span></li>
+					<li id="ca-talk"><span><a href="https://wiki.videolan.org/Talk:GenerateLibFromDll/" title="Discussion about the content page [alt-shift-t]" accesskey="t">Discussion</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-variants" class="vectorMenu emptyPortlet">
+	<h4>
+		</h4>
+	<h5><span>Variants</span><a href="#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+			</div>
+			<div id="right-navigation">
+				
+<!-- 0 -->
+<div id="p-views" class="vectorTabs">
+	<h5>Views</h5>
+	<ul>
+					<li id="ca-view" class="selected"><span><a href="https://wiki.videolan.org/GenerateLibFromDll/">Read</a></span></li>
+					<li id="ca-viewsource"><span><a href="https://wiki.videolan.org/index.php?title=GenerateLibFromDll&amp;action=edit" title="This page is protected.
+You can view its source [alt-shift-e]" accesskey="e">View source</a></span></li>
+					<li id="ca-history" class="collapsible"><span><a href="https://wiki.videolan.org/index.php?title=GenerateLibFromDll&amp;action=history" title="Past revisions of this page [alt-shift-h]" accesskey="h">View history</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-cactions" class="vectorMenu emptyPortlet">
+	<h5><span>Actions</span><a href="#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+
+<!-- 2 -->
+<div id="p-search">
+	<h5><label for="searchInput">Search</label></h5>
+	<form action="/index.php" id="searchform">
+				<div>
+			<input placeholder="Search" autocomplete="off" name="search" title="Search VideoLAN Wiki [alt-shift-f]" accesskey="f" id="searchInput" type="search">			<input name="go" value="Go" title="Go to a page with this exact name if exists" id="searchGoButton" class="searchButton" type="submit">			<input name="fulltext" value="Search" title="Search the pages for this text" id="mw-searchButton" class="searchButton" type="submit">					<input name="title" value="Special:Search" type="hidden">
+		</div>
+	</form>
+</div>
+
+<!-- /2 -->
+			</div>
+		</div>
+		<!-- /header -->
+		<!-- panel -->
+			<div id="mw-panel" class="noprint">
+				<!-- logo -->
+					<div id="p-logo"><a style="background-image: url(/skins/common/images/vlc_wiki.png);" href="https://wiki.videolan.org/Main_Page/" title="Visit the main page"></a></div>
+				<!-- /logo -->
+				
+<!-- Help / Documentation -->
+<div class="portal" id="p-Help_.2F_Documentation">
+	<h5>Help / Documentation</h5>
+	<div class="body">
+		<ul>
+			<li id="n-Documentation"><a href="https://wiki.videolan.org/Documentation:Documentation/">Documentation</a></li>
+			<li id="n-VLC-Support-Guide"><a href="https://wiki.videolan.org/VSG:Main/">VLC Support Guide</a></li>
+			<li id="n-Forum"><a href="https://forum.videolan.org/" rel="nofollow">Forum</a></li>
+			<li id="n-Knowledge-Base"><a href="https://wiki.videolan.org/Knowledge_Base/">Knowledge Base</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /Help / Documentation -->
+
+<!-- Development -->
+<div class="portal" id="p-Development">
+	<h5>Development</h5>
+	<div class="body">
+		<ul>
+			<li id="n-Developers-Corner"><a href="https://wiki.videolan.org/VLC_Developers_Corner/">Developers Corner</a></li>
+			<li id="n-x264-development"><a href="https://wiki.videolan.org/X264/">x264 development</a></li>
+			<li id="n-Join-the-project"><a href="https://wiki.videolan.org/Help_VideoLAN/">Join the project</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /Development -->
+
+<!-- VideoLAN wiki -->
+<div class="portal" id="p-VideoLAN_wiki">
+	<h5>VideoLAN wiki</h5>
+	<div class="body">
+		<ul>
+			<li id="n-mainpage"><a href="https://wiki.videolan.org/Main_Page/" title="Visit the main page [alt-shift-z]" accesskey="z">Main Page</a></li>
+			<li id="n-About-VideoLAN"><a href="https://wiki.videolan.org/VideoLAN/">About VideoLAN</a></li>
+			<li id="n-VLC-media-player"><a href="https://wiki.videolan.org/VLC_media_player/">VLC media player</a></li>
+			<li id="n-recentchanges"><a href="https://wiki.videolan.org/Special:RecentChanges/" title="A list of recent changes in the wiki [alt-shift-r]" accesskey="r">Recent changes</a></li>
+			<li id="n-Rules"><a href="https://wiki.videolan.org/VideoLAN_Wiki:Rules/">Rules</a></li>
+			<li id="n-Sandbox"><a href="https://wiki.videolan.org/Sandbox/">Sandbox</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /VideoLAN wiki -->
+
+<!-- SEARCH -->
+
+<!-- /SEARCH -->
+
+<!-- TOOLBOX -->
+<div class="portal" id="p-tb">
+	<h5>Toolbox</h5>
+	<div class="body">
+		<ul>
+			<li id="t-whatlinkshere"><a href="https://wiki.videolan.org/Special:WhatLinksHere/GenerateLibFromDll/" title="A list of all wiki pages that link here [alt-shift-j]" accesskey="j">What links here</a></li>
+			<li id="t-recentchangeslinked"><a href="https://wiki.videolan.org/Special:RecentChangesLinked/GenerateLibFromDll/" title="Recent changes in pages linked from this page [alt-shift-k]" accesskey="k">Related changes</a></li>
+			<li id="t-specialpages"><a href="https://wiki.videolan.org/Special:SpecialPages/" title="A list of all special pages [alt-shift-q]" accesskey="q">Special pages</a></li>
+			<li id="t-permalink"><a href="https://wiki.videolan.org/index.php?title=GenerateLibFromDll&amp;oldid=26645" title="Permanent link to this revision of the page">Permanent link</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /TOOLBOX -->
+
+<!-- LANGUAGES -->
+
+<!-- /LANGUAGES -->
+			</div>
+		<!-- /panel -->
+		<!-- footer -->
+		<div id="footer">
+							<ul id="footer-info">
+											<li id="footer-info-lastmod"> This page was last modified on 14 March 2014, at 23:52.</li>
+											<li id="footer-info-viewcount">This page has been accessed 51,292 times.</li>
+									</ul>
+							<ul id="footer-places">
+											<li id="footer-places-privacy"><a href="https://wiki.videolan.org/VideoLAN_Wiki:Privacy_policy/" title="VideoLAN Wiki:Privacy policy">Privacy policy</a></li>
+											<li id="footer-places-about"><a href="https://wiki.videolan.org/VideoLAN_Wiki:About/" title="VideoLAN Wiki:About">About VideoLAN Wiki</a></li>
+											<li id="footer-places-disclaimer"><a href="https://wiki.videolan.org/VideoLAN_Wiki:General_disclaimer/" title="VideoLAN Wiki:General disclaimer">Disclaimers</a></li>
+									</ul>
+										<ul id="footer-icons" class="noprint">
+					<li id="footer-poweredbyico">
+						<a href="https://www.mediawiki.org/"><img src="dll_to_lib_files/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki" height="31" width="88"></a>
+					</li>
+				</ul>
+						<div style="clear:both"></div>
+		</div>
+		<!-- /footer -->
+		<script>if(window.mw){
+mw.loader.state({"site":"loading","user":"ready","user.groups":"ready"});
+}</script>
+<script src="dll_to_lib_files/load_002.php"></script>
+<script>if(window.mw){
+mw.loader.load(["mediawiki.user","mediawiki.page.ready","mediawiki.searchSuggest"], null, true);
+}</script><script type="text/javascript" src="dll_to_lib_files/load_005.php"></script>
+<script src="dll_to_lib_files/load_004.php"></script>
+<!-- Served in 0.078 secs. -->
+	
+
+
+<style>#content > #center > .dose > .dosesingle,
+#content > #right > .dose > .dosesingle
+{display:none !important;}</style><div class="suggestions" style="display: none; font-size: 13.3333px;"><div class="suggestions-results"></div><div class="suggestions-special"></div></div></body><!-- Cached 20160219145424 --></html>

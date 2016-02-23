@@ -1,0 +1,19 @@
+#include <models.h>
+#include <QtSql>
+#include <Qt>
+
+my_model::my_model(QWidget *parent, QSqlDatabase database) : QSqlTableModel(parent, database)
+{
+    this->setEditStrategy(QSqlTableModel::OnFieldChange);
+    this->setSort(0,Qt::AscendingOrder);
+    this->supportedDragActions(Qt::CopyAction);
+    
+            
+}
+my_model::~my_model()
+{
+}
+Qt::ItemFlags my_model::flags(const QModelIndex &index) const
+{
+    return Qt::ItemIsEnabled | Qt::ItemIsDragEnabled;
+}
