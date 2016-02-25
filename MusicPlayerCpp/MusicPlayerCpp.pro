@@ -42,5 +42,6 @@ INCLUDEPATH += C:\Users\Conner\Documents\MusicPlayerCpp\MusicPlayerCpp\VLC \
 DISTFILES += \
     libvlc.lib \
     libvlc.dll \
-    libvlccore.dll
+    libvlccore.dll \
+    device_list
 

@@ -3,6 +3,8 @@
 #include <QtMultimedia/QMediaPlayer>
 #include <QMainWindow>
 #include <vlc/vlc.h>
+#include <QSignalMapper>
+#include <string>
 
 namespace Ui {
 class MainWindow;
@@ -14,7 +16,6 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
-    QMediaPlayer *player;
     ~MainWindow();
 
 private slots:
@@ -24,10 +25,17 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    libvlc_instance_t *instance;
-    libvlc_media_player_t *mplayer;
-    libvlc_media_t *media;
-    int a;
+    QMediaPlayer *player;
+    libvlc_instance_t *instanceRight;
+    libvlc_media_player_t *mPlayerRight;
+    libvlc_media_t *mediaRight;
+    libvlc_instance_t *instanceLeft;
+    libvlc_media_player_t *mPlayerLeft;
+    libvlc_media_t *mediaLeft;
+    std::map <QString, QString> deviceMap;
+
+public slots:
+    void handleDeviceChange(QString device);
 };
 
 

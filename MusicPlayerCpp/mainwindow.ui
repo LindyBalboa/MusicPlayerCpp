@@ -124,57 +124,60 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="fileMenu">
     <property name="title">
      <string>File</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuEdit">
+   <widget class="QMenu" name="editMenu">
     <property name="title">
      <string>Edit</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuView">
+   <widget class="QMenu" name="viewMenu">
     <property name="title">
      <string>View</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuPlay">
+   <widget class="QMenu" name="audioMenu">
     <property name="title">
-     <string>Play</string>
+     <string>Audio</string>
     </property>
+    <widget class="QMenu" name="menuLeft_Player_Devices">
+     <property name="title">
+      <string>Left Player Devices</string>
+     </property>
+    </widget>
+    <widget class="QMenu" name="menuRight_Player_Devices">
+     <property name="title">
+      <string>Right Player Devices</string>
+     </property>
+    </widget>
+    <addaction name="menuLeft_Player_Devices"/>
+    <addaction name="menuRight_Player_Devices"/>
    </widget>
-   <widget class="QMenu" name="menuTools">
+   <widget class="QMenu" name="toolsMenu">
     <property name="title">
      <string>Tools</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuHelp">
+   <widget class="QMenu" name="helpMenu">
     <property name="title">
      <string>Help</string>
     </property>
-    <widget class="QMenu" name="menuAbout">
+    <widget class="QMenu" name="aboutMenu">
      <property name="title">
       <string>About</string>
      </property>
-     <addaction name="actionDenied"/>
     </widget>
-    <widget class="QMenu" name="menuAhah">
-     <property name="title">
-      <string>ahah</string>
-     </property>
-     <addaction name="action_2"/>
-    </widget>
-    <addaction name="menuAbout"/>
-    <addaction name="separator"/>
-    <addaction name="menuAhah"/>
+    <addaction name="aboutMenu"/>
    </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
-   <addaction name="menuView"/>
-   <addaction name="menuPlay"/>
-   <addaction name="menuTools"/>
-   <addaction name="menuHelp"/>
+   <addaction name="fileMenu"/>
+   <addaction name="editMenu"/>
+   <addaction name="viewMenu"/>
+   <addaction name="audioMenu"/>
+   <addaction name="toolsMenu"/>
+   <addaction name="helpMenu"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -208,6 +211,16 @@
     <font>
      <pointsize>23</pointsize>
     </font>
+   </property>
+  </action>
+  <action name="actionDummyDevice">
+   <property name="text">
+    <string>DummyDevice</string>
+   </property>
+  </action>
+  <action name="actionGn">
+   <property name="text">
+    <string>gn</string>
    </property>
   </action>
  </widget>
