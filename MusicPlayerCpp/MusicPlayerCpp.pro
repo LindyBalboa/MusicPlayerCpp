@@ -14,7 +14,8 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    librarywidget.cpp
+    librarywidget.cpp \
+    vlc.cpp
 
 HEADERS  += mainwindow.h \
         librarywidget.h \
@@ -29,7 +30,8 @@ HEADERS  += mainwindow.h \
     vlc/libvlc_media_list_player.h \
     vlc/libvlc_media_player.h \
     vlc/libvlc_structures.h \
-    vlc/libvlc_vlm.h
+    vlc/libvlc_vlm.h \
+    vlc.h
 
 FORMS    += mainwindow.ui
 
