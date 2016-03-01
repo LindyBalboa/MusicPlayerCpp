@@ -12,7 +12,7 @@ VLC::VLC(QObject *parent) : QObject(parent)
     instanceRight = libvlc_new(0,vlc_args);
     mediaRight = libvlc_media_new_location(instanceRight, "file:///C:/test.m4a");
     mPlayerRight = libvlc_media_player_new_from_media(mediaRight);
-    play(mPlayerRight);
+    //play(mPlayerRight);
 
     instanceLeft = libvlc_new(0,vlc_args);
     mediaLeft = libvlc_media_new_location(instanceLeft, "file:///C:/test.mp3");
