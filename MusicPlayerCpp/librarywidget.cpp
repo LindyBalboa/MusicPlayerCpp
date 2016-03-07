@@ -6,14 +6,14 @@
 LibraryWidget::LibraryWidget(QWidget *parent) : QTableView(parent)
 {
     qDebug() << "library getting made";
-    QSqlDatabase library_db = QSqlDatabase::addDatabase("QSQLITE");
-    library_db.setDatabaseName("database.db");
-    if (library_db.open()){
+    QSqlDatabase libraryDb = QSqlDatabase::addDatabase("QSQLITE");
+    libraryDb.setDatabaseName("database.db");
+    if (libraryDb.open()){
         qDebug("DB is connected.");
     }else{
         qDebug("DB is not connected.");
     }
-    LibrarySqlTableModel *LibraryModel = new LibrarySqlTableModel(this,library_db);
+    LibrarySqlTableModel *LibraryModel = new LibrarySqlTableModel(this,libraryDb);
     LibraryModel->setTable("table1");
     LibraryModel->select();
     setModel(LibraryModel);
@@ -73,25 +73,20 @@ QMimeData* LibrarySqlTableModel::mimeData(const QModelIndexList &indexes) const
         {
             if (rows.contains(index.row()) == false)
             {
-                for (int i=0; i <= this->record(index.row()).count(); i++)
+                for (int i=0; i < this->record(index.row()).count(); i++)
                 {
                     records << this->record(index.row()).fieldName(i) << this->record(index.row()).value(i).toString();
                 }
+                rows.append(index.row());
             }
         }
     }
-
-    stream << records;
-    mimeData->setData("application/vnd.text.list", encodedData);
-
-    QDataStream streamo(&encodedData, QIODevice::ReadOnly);
-    QList<QString> out;
-    while (!streamo.atEnd()){
-        QString text;
-        streamo >> text;
-        out << text;
+    for (int i=0; i<records.size()-1; i+=2)
+    {
+        qDebug() << records[i] << records[i+1];
     }
-    qDebug() << out;
+    stream << records;
+    mimeData->setData("application/test", encodedData);
 
     return mimeData;
 }
