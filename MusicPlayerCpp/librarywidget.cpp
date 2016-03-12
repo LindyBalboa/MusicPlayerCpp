@@ -26,6 +26,8 @@ LibraryWidget::LibraryWidget(QWidget *parent) : QTableView(parent)
     horizontalHeader()->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     setDragEnabled(true);
     setShowGrid(false);
+    setSortingEnabled(true);
+    sortByColumn(2, Qt::DescendingOrder);
 
     setStyleSheet("QTableView::item::selected::active{\
                                                  color: black;\
@@ -36,7 +38,6 @@ LibraryWidget::LibraryWidget(QWidget *parent) : QTableView(parent)
                   ");
     qDebug() << this->model();
 }
-
 LibraryWidget::~LibraryWidget()
 {
 
@@ -55,17 +56,13 @@ Qt::ItemFlags LibrarySqlTableModel::flags(const QModelIndex &index) const
 {
     return Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
 }
-Qt::DropActions LibrarySqlTableModel::supportedDragActions() const
-{
-    return Qt::CopyAction;
-}
 QMimeData* LibrarySqlTableModel::mimeData(const QModelIndexList &indexes) const
 {
     QMimeData *mimeData = new QMimeData();
     QByteArray encodedData;
 
     QDataStream stream(&encodedData, QIODevice::WriteOnly);
-    QList<QString> records;
+    QList<QMap<QString, QVariant> > records;
     QList<int> rows;
     foreach (QModelIndex index, indexes)
     {
@@ -73,14 +70,21 @@ QMimeData* LibrarySqlTableModel::mimeData(const QModelIndexList &indexes) const
         {
             if (rows.contains(index.row()) == false)
             {
-                for (int i=0; i < this->record(index.row()).count(); i++)
-                {
-                    records << this->record(index.row()).fieldName(i) << this->record(index.row()).value(i).toString();
-                }
                 rows.append(index.row());
             }
         }
     }
+    qSort(rows.begin(),rows.end());
+    for (int i = rows.size()-1; i>=0; i--)
+    {
+        QMap<QString, QVariant> map;
+        for (int j=0; j < this->record(i).count(); j++)
+        {
+            map.insert(this->record(rows[i]).fieldName(j), QVariant(this->record(rows[i]).value(j)));
+        }
+        stream << map;
+    }
+
     for (int i=0; i<records.size()-1; i+=2)
     {
         qDebug() << records[i] << records[i+1];
@@ -89,4 +93,8 @@ QMimeData* LibrarySqlTableModel::mimeData(const QModelIndexList &indexes) const
     mimeData->setData("application/test", encodedData);
 
     return mimeData;
+}
+Qt::DropActions LibrarySqlTableModel::supportedDragActions() const
+{
+    return Qt::CopyAction;
 }

@@ -5,10 +5,6 @@
 #include <QSignalMapper>
 #include <string>
 
-namespace Ui {
-class MainWindow;
-}
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -23,7 +19,6 @@ private slots:
     void on_pushButton_5_clicked();
 
 private:
-    Ui::MainWindow *ui;
     std::map <QString, QString> deviceMap;
     QMap<QString,QString> devices;
 

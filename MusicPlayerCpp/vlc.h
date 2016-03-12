@@ -16,23 +16,31 @@ class VLC : public QObject
 public:
     VLC(QObject *parent = 0);
     QMap<QString, QString> getDevices();
-    void play(libvlc_media_player_t* player);
-    void pause(libvlc_media_player_t* player);
-    void setPause(libvlc_media_player_t* player);
-    void stop(libvlc_media_player_t* player);
-
+    void next();
+    void previous();
+    void changeTrack(QString path);
+    void setPosition(qint64 currentTime);
 private:
-    libvlc_instance_t *instanceRight;
-    libvlc_media_player_t *mPlayerRight;
-    libvlc_media_t *mediaRight;
-    libvlc_instance_t *instanceLeft;
-    libvlc_media_player_t *mPlayerLeft;
-    libvlc_media_t *mediaLeft;
+    libvlc_instance_t *instance;
+    libvlc_media_player_t *mediaPlayer;
+    libvlc_media_t *media;
+    libvlc_event_manager_t *eventManager;
     QMap<QString,QString> deviceMap;
+    void updateDeviceMap(QMap<QString, QString> &deviceMap);
     int doPause = 0;
-
+    bool playerIsInit = false;
+    void registerEvents();
+    static void callbacks(const libvlc_event_t *event, void *ptr);
 public slots:
+    void play();
+    void pause();
+    void setPause();
+    void stop();
     void handleDeviceChange(QString device);
+signals:
+    timeChanged(qint64);
+    lengthChanged(qint64);
+    endReached();
 };
 
 

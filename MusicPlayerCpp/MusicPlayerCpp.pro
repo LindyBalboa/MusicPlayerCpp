@@ -16,7 +16,9 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     librarywidget.cpp \
     vlc.cpp \
-    playlistwidget.cpp
+    playlistwidget.cpp \
+    playerwidget.cpp \
+    sliderclass.cpp
 
 HEADERS  += mainwindow.h \
         librarywidget.h \
@@ -33,9 +35,11 @@ HEADERS  += mainwindow.h \
     vlc/libvlc_structures.h \
     vlc/libvlc_vlm.h \
     vlc.h \
-    playlistwidget.h
+    playlistwidget.h \
+    playerwidget.h \
+    sliderclass.h
 
-FORMS    += mainwindow.ui
+FORMS    +=
 
 LIBS += -LC:\Users\Conner\Documents\MusicPlayerCpp\MusicPlayerCpp -llibvlc
 
