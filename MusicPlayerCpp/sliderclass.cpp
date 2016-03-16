@@ -2,6 +2,7 @@
 
 SliderClass::SliderClass(Qt::Orientation orientation, QWidget *parent) : QSlider(orientation, parent)
 {
+    setFocusPolicy(Qt::NoFocus);
 
 }
 

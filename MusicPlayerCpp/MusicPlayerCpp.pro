@@ -42,6 +42,7 @@ HEADERS  += mainwindow.h \
 FORMS    +=
 
 LIBS += -LC:\Users\Conner\Documents\MusicPlayerCpp\MusicPlayerCpp -llibvlc
+LIBS += -LC:\Users\Conner\Documents\MusicPlayerCpp\MusicPlayerCpp -llibmysql
 
 OTHER_FILES += database.db
 
@@ -51,5 +52,6 @@ DISTFILES += \
     libvlc.lib \
     libvlc.dll \
     libvlccore.dll \
-    device_list
+    device_list \
+    libmysql.dll
 

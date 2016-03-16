@@ -15,13 +15,23 @@
 #include <QTreeView>
 #include <QTableView>
 #include <QPushButton>
-#include <playerwidget.h>
 using namespace std;
 
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
+    QSqlDatabase libraryDb = QSqlDatabase::addDatabase("QSQLITE");
+    libraryDb.setDatabaseName("database.db");
+    if (libraryDb.open()){
+        //qDebug("DB is connected.");
+    }else{
+        //qDebug("DB is not connected.");
+    }
+    QSqlQuery q(libraryDb);
+    //qDebug() << "main"<< q.exec("DELETE FROM left");
+   // qDebug() << q.lastError();
+    //libraryDb.commit();
     QWidget *centralWidget = new QWidget;
     setCentralWidget(centralWidget);
     setGeometry(50,50,600,600);
@@ -47,17 +57,17 @@ MainWindow::MainWindow(QWidget *parent) :
         centralSplitter->addWidget(libraryTreeTableSplitter);
     QTreeView *libraryTree = new QTreeView(this);
         libraryTreeTableSplitter->addWidget(libraryTree);
-    LibraryWidget *libraryWidget = new LibraryWidget(this);
+    LibraryWidget *libraryWidget = new LibraryWidget(libraryDb, this);
         libraryTreeTableSplitter->addWidget(libraryWidget);
     libraryTreeTableSplitter->setStretchFactor(0,1);
     libraryTreeTableSplitter->setStretchFactor(1,2);
 
     QSplitter *playerSplitter = new QSplitter();
     centralSplitter->addWidget(playerSplitter);
-    PlayerWidget *left = new PlayerWidget("left");
-    playerSplitter->addWidget(left);
-    PlayerWidget *right = new PlayerWidget("right");
-    playerSplitter->addWidget(right);
+    leftPlayer = new PlayerWidget("left", libraryDb);
+    playerSplitter->addWidget(leftPlayer);
+    rightPlayer = new PlayerWidget("right", libraryDb);
+    playerSplitter->addWidget(rightPlayer);
 
     VLC* vlc = new VLC();  //Initialize the VLC class which controls both LEFT and RIGHT players
     //qDebug("AUDIO OUTPUTS");
@@ -72,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMap<QString,QString>::iterator i;  //Build the device menus dynamically
     for (i = devices.begin(); i != devices.end(); i++)
     {
-        qDebug() << i.key() << " " << i.value() << endl;
+        //qDebug() << i.key() << " " << i.value() << endl;
 
         tempAction = rightPlayerDeviceActionGroup->addAction(i.key());
         rightPlayerDeviceActionGroup->addAction(tempAction);
@@ -102,6 +112,13 @@ void MainWindow::on_pushButton_clicked()
 
 void MainWindow::on_pushButton_5_clicked()
 {
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    leftPlayer->playlist->saveNowPlaying();
+    rightPlayer->playlist->saveNowPlaying();
+    QMainWindow::closeEvent(event);
 }
 
 

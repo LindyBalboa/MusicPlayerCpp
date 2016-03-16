@@ -1,17 +1,15 @@
 #include "playlistwidget.h"
-#include <QSqlTableModel>
-#include <QTableView>
-#include <QSqlQuery>
 #include <QDebug>
-#include <QSqlRecord>
 #include <QSqlField>
 #include <QHeaderView>
 #include <QDragEnterEvent>
-#include <QPainter>
 #include <QFont>
+#include <QSqlError>
+#include <QSqlResult>
 
-PlaylistWidget::PlaylistWidget(QString playerSide, QWidget *parent) : QTableView(parent)
+PlaylistWidget::PlaylistWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget *parent) : QTableView(parent)
 {
+    _playerSide = playerSide;
     setStyleSheet("QTableView:item:selected:active{\
                                                                 color: black; \
                                                                 background: qlineargradient(x1:1, y1:1, x2:1, y2:0, stop:0 #E0F0FF, stop:0.85 #E0F0FF, stop:1 white);\
@@ -20,75 +18,74 @@ PlaylistWidget::PlaylistWidget(QString playerSide, QWidget *parent) : QTableView
                                                                 }\
                   ");
 
-    QSqlDatabase playlistDb = QSqlDatabase::addDatabase("QSQLITE", playerSide);
-    playlistDb.setDatabaseName(":memory:");
-    qDebug() << playlistDb.open();
-    QSqlQuery query(playlistDb);
-    query.exec("create table if not exists playlist(pl_id INTEGER PRIMARY KEY AUTOINCREMENT,\
-                                                    id INTEGER, \
-                                                    album TEXT, \
-                                                    Album_artist TEXT,\
-                                                    Artist TEXT,\
-                                                    BPM INTEGER,\
-                                                    Comment TEXT,\
-                                                    Competition INTEGER,\
-                                                    Composer TEXT,\
-                                                    Custom_1 TEXT,\
-                                                    Custom_2 TEXT,\
-                                                    Custom_3 TEXT,\
-                                                    Custom_4 TEXT,\
-                                                    Custom_5 TEXT,\
-                                                    Disc_numbers TEXT,\
-                                                    Date TEXT,\
-                                                    Filename TEXT,\
-                                                    Genre TEXT,\
-                                                    Grouping TEXT,\
-                                                    Length REAL,\
-                                                    Mood TEXT,\
-                                                    Occasion TEXT,\
-                                                    Original_date TEXT,\
-                                                    Path TEXT,\
-                                                    Play_count INTEGER,\
-                                                    Quality TEXT,\
-                                                    Rating INTEGER,\
-                                                    Tempo TEXT,\
-                                                    Title TEXT,\
-                                                    Track_numbers TEXT,\
-                                                    Track_total TEXT)");
-
-    playlistDb.commit();
-
-    //PlaylistModel* playlistModel = new PlaylistModel(this, playlistDb);
-    playlistModel = new PlaylistModel(this, playlistDb);
+    _libraryDb = libraryDb;
+    memDb = QSqlDatabase::addDatabase("QSQLITE", _playerSide);
+    memDb.setDatabaseName(":memory:");
+    memDb.open();
+    QSqlQuery query(memDb);
+    query.exec("ATTACH DATABASE \"database.db\" as \"library\" ");
+    _libraryDb.transaction();
+    _libraryDb.commit();
+    memDb.transaction();
+    query.exec(QString("create table left(IDNowPlaying INTEGER,\
+                                        IDSong INTEGER)"));
+    query.exec("INSERT INTO left SELECT * FROM library.left");
+    memDb.commit();
+    query.clear();
+    playlistModel = new PlaylistModel(_playerSide, this, _libraryDb);
+    playlistModel->setTable(_playerSide);
     setModel(playlistModel);
-    playlistModel->setTable("playlist");
     playlistModel->select();
-
-    QSqlRecord record = playlistDb.record("playlist");
-    for (int i=0; i<10; i++)
-    {
-        record.setValue(1, i);
-        playlistModel->insertRecord(i,record);
-    }
-    //qDebug() << record.value(1);
-    playlistModel->select();
+    viewport()->update();
+    //playlistModel->setQuery(QString("SELECT * FROM %1 A\
+      //                              LEFT JOIN table1 B\
+        //                            ON A.IDSong = B.IDSong").arg(_playerSide), libraryDb);
 
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setDropIndicatorShown(true);
     viewport()->setAcceptDrops(true);
     setDragDropMode(QAbstractItemView::DragDrop);
-    verticalHeader()->hide();
+    //verticalHeader()->hide();
     verticalHeader()->setDefaultSectionSize(15);
     horizontalHeader()->setSectionsMovable(true);
     horizontalHeader()->setFixedHeight(20);
     horizontalHeader()->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    setFocusPolicy(Qt::StrongFocus);
     setDragEnabled(true);
     setShowGrid(false);
     setAcceptDrops(true);
     setEditTriggers(QAbstractItemView::SelectedClicked);
     show();
     }
+QMimeData* PlaylistModel::mimeData(const QModelIndexList &indexes) const
+{
+    QMimeData *mimeData = new QMimeData();
+    QByteArray encodedData;
+
+    QDataStream stream(&encodedData, QIODevice::WriteOnly);
+    QList<int> rows;
+    foreach (QModelIndex index, indexes)
+    {
+        if (index.isValid())
+        {
+            if (rows.contains(index.row()) == false)
+            {
+                rows.append(index.row());
+            }
+        }
+    }
+    qSort(rows.begin(),rows.end());
+    stream << rows.size() ;
+    for (int i = rows.size()-1; i>=0; i--)
+    {
+        stream << this->record(rows[i]).value("IDSong").toInt();
+    }
+
+    mimeData->setData("application/test", encodedData);
+
+    return mimeData;
+}
 void PlaylistWidget::dragEnterEvent(QDragEnterEvent *event)
 {
     event->accept();
@@ -113,48 +110,89 @@ void PlaylistWidget::dragMoveEvent(QDragMoveEvent *event)
     }
     viewport()->update();
 }
+
+void PlaylistWidget::dragLeaveEvent(QDragLeaveEvent *event)
+{
+    isDragging = false;
+    viewport()->update();
+}
+
 void PlaylistWidget::dropEvent(QDropEvent *event)
 {
-
+    playlistModel->database().transaction();
+    QSqlQuery query(_libraryDb);
+    QString exec;
     QModelIndex dropIndex = indexAt(event->pos());
+    int dropRow;
     QRect rect(0,\
                         rowViewportPosition(dragHoverIndex.row()),\
                         viewport()->width(),\
                         15\
                );
     dropIndicatorPosition = position(event->pos(), rect, dropIndex);
+        if (dropIndex.row()==-1)
+        {
+            qDebug() << "APPEND";
+            dropRow = playlistModel->rowCount();
+        }else if (dropIndicatorPosition == QAbstractItemView::AboveItem)
+        {
+            dropRow = dropIndex.row();
+        } else if (dropIndicatorPosition == QAbstractItemView::BelowItem)
+        {
+           dropRow = dropIndex.row() + 1;
+        }
+
+    if (event->source() == this)
+    {
+        QModelIndexList selectedIndexesRows = this->selectionModel()->selectedRows(); //return 0 column QModelINdex for each row
+        QList<int> selectedRows;
+        foreach(QModelIndex index, selectedIndexesRows)
+        {
+            selectedRows << index.row();
+        }
+        qDebug() << selectedRows;
+        qSort(selectedRows.begin(), selectedRows.end(), qGreater<int>() );
+        foreach(int row, selectedRows)
+        {
+            exec = QString("DELETE FROM %1 WHERE IDNowPlaying = %2").arg(_playerSide,QString::number(row+1));
+            query.exec(exec);
+            exec = QString("UPDATE %1 SET IDNowPlaying = IDNowPlaying - 1 WHERE IDNowPlaying > %2").arg(_playerSide,QString::number(row+1));
+            query.exec(exec);
+
+            if (row < dropRow)
+            {
+                dropRow = dropRow - 1;
+            }
+        }
+    }else
+    {
+
+    }
+
     const QMimeData *mimeData = event->mimeData();
     QByteArray data = mimeData->data("application/test");
     QDataStream outStream(data);
-    while (!outStream.atEnd())
+    int numberOfRows;
+    outStream >> numberOfRows;
+    qDebug() << "#Ro" << numberOfRows;
+    exec = QString("UPDATE %1 SET IDNowPlaying = -(IDNowPlaying + %2) where IDNowPlaying > %3").arg(_playerSide,QString::number(numberOfRows),QString::number(dropRow));
+    query.exec(exec);
+    exec = QString("UPDATE %1 SET IDNowPlaying = -IDNowPlaying WHERE IDNowPlaying<0").arg(_playerSide);
+    query.exec(exec);
+
+    int j=numberOfRows; //Doing it this way is necessary to maintiain the proper insertion order
+    while (j>0)
     {
-        QMap<QString, QVariant> trackRecord;
-        outStream >> trackRecord;
-        if (!trackRecord.empty())
-        {
-            QSqlRecord record;
-            QMapIterator<QString, QVariant> i(trackRecord);
-            while (i.hasNext())
-            {
-                i.next();
-                QSqlField field(i.key());
-                record.append(field);
-                record.setValue(i.key(),i.value());
-            }
-
-            if (dropIndicatorPosition == QAbstractItemView::AboveItem)
-            {
-                playlistModel->insertRecord(indexAt(event->pos()).row(),record);
-            } else if (dropIndicatorPosition == QAbstractItemView::BelowItem)
-            {
-                playlistModel->insertRecord(indexAt(event->pos()).row()+1,record);
-            }
-            //viewport()->update();
-
-        }
+        int IDSong;
+        outStream >> IDSong;
+        exec = QString("INSERT INTO %1 (IDNowPlaying, IDSong) VALUES (%2, %3)").arg(_playerSide, QString::number(dropRow+j), QString::number(IDSong));
+        query.exec(exec);
+        j--;
     }
-    //QTableView::dropEvent(event);
+    _libraryDb.commit();
+    playlistModel->select();
     isDragging = false;
+    this->viewport()->update();
 }
 void PlaylistWidget::mousePressEvent(QMouseEvent *event)
 {
@@ -215,9 +253,13 @@ QAbstractItemView::DropIndicatorPosition PlaylistWidget::position(const QPoint &
 }
 
 
-PlaylistModel::PlaylistModel(QWidget *parent, QSqlDatabase playlistDb) : QSqlTableModel(parent, playlistDb)
+PlaylistModel::PlaylistModel(QString playerSide, QWidget *parent, QSqlDatabase libraryDb) : QSqlTableModel(parent, libraryDb)
 {
-
+    _playerSide = playerSide;
+    setSort(0, Qt::AscendingOrder);
+}
+PlaylistModel::~PlaylistModel()
+{
 }
 Qt::ItemFlags PlaylistModel::flags(const QModelIndex &index) const
 {
@@ -235,3 +277,42 @@ Qt::DropActions PlaylistModel::supportedDropActions() const
 {
     return (Qt::MoveAction | Qt::CopyAction);
 }
+QString PlaylistModel::selectStatement() const
+{
+    return QString("SELECT * FROM " + _playerSide + " A LEFT JOIN table1 B ON A.IDSong = B.IDSong ORDER BY IDNowPlaying ASC");
+}
+void PlaylistWidget::saveNowPlaying()
+{
+}
+
+void PlaylistWidget::keyReleaseEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Delete)
+    {
+        _libraryDb.transaction();
+        QSqlQuery query(_libraryDb);
+        QModelIndexList selectedIndexesRows = this->selectionModel()->selectedRows(); //return 0 column QModelINdex for each row
+        QList<int> selectedRows;
+        foreach(QModelIndex index, selectedIndexesRows)
+        {
+            selectedRows << index.row();
+        }
+        qSort(selectedRows.begin(), selectedRows.end(), qGreater<int>() );
+        foreach(int row, selectedRows)
+        {
+            query.exec(QString("DELETE FROM %1 WHERE IDNowPlaying = %2").arg(_playerSide,QString::number(row+1)));
+            query.exec(QString("UPDATE %1 SET IDNowPlaying = IDNowPlaying - 1 WHERE IDNowPlaying > %2").arg(_playerSide,QString::number(row+1)));
+        }
+        this->playlistModel->select();
+        while(this->playlistModel->canFetchMore())
+        {
+            this->playlistModel->fetchMore();
+        }
+        _libraryDb.commit();
+
+    }else
+    {
+    event->ignore();
+    }
+}
+

@@ -36,6 +36,7 @@ public slots:
     void pause();
     void setPause();
     void stop();
+    void setVolume(qint64 volume);
     void handleDeviceChange(QString device);
 signals:
     timeChanged(qint64);

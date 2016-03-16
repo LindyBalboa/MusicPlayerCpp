@@ -13,13 +13,15 @@ class PlayerWidget : public QWidget
     Q_OBJECT
 
 public:
-    VLC *vlc;
-    PlayerWidget(QString playerSide, QWidget *parent = 0);
+    PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget *parent = 0);
     ~PlayerWidget();
+    PlaylistWidget *playlist;
+    VLC *vlc;
 
 private:
-    PlaylistWidget *playlist;
     SliderClass *positionSlider;
+    SliderClass *volumeSlider;
+    QPushButton *playButton;
     void loadNextTrack();
 public slots:
     void trackSingleClicked(const QModelIndex &index);
@@ -27,9 +29,11 @@ public slots:
     void positionSliderReleased();
     //void previousTrack();
 protected:
+    void keyReleaseEvent(QKeyEvent *event);
 private slots:
     void updateSlider(qint64 time);
     void lengthChanged(quint64 totalTime);
+    void playClicked();
 };
 
 class PlaylistDelegate : public QItemDelegate

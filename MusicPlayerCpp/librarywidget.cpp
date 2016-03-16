@@ -3,19 +3,11 @@
 #include <iostream>
 
 
-LibraryWidget::LibraryWidget(QWidget *parent) : QTableView(parent)
+LibraryWidget::LibraryWidget(QSqlDatabase database, QWidget *parent) : QTableView(parent)
 {
     qDebug() << "library getting made";
-    QSqlDatabase libraryDb = QSqlDatabase::addDatabase("QSQLITE");
-    libraryDb.setDatabaseName("database.db");
-    if (libraryDb.open()){
-        qDebug("DB is connected.");
-    }else{
-        qDebug("DB is not connected.");
-    }
-    LibrarySqlTableModel *LibraryModel = new LibrarySqlTableModel(this,libraryDb);
-    LibraryModel->setTable("table1");
-    LibraryModel->select();
+    libraryDb = database;
+    LibrarySqlTableModel *LibraryModel = new LibrarySqlTableModel(this, libraryDb);
     setModel(LibraryModel);
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -36,18 +28,19 @@ LibraryWidget::LibraryWidget(QWidget *parent) : QTableView(parent)
                                                  border-bottom: 1px solid #A3D1FF;\
                                                  }\
                   ");
-    qDebug() << this->model();
 }
 LibraryWidget::~LibraryWidget()
 {
 
 }
 
-LibrarySqlTableModel::LibrarySqlTableModel(QWidget *parent, QSqlDatabase database) : QSqlTableModel(parent, database)
+LibrarySqlTableModel::LibrarySqlTableModel(QWidget *parent, QSqlDatabase libraryDb) : QSqlQueryModel(parent)
 {
-    setEditStrategy(QSqlTableModel::OnFieldChange);
-    setSort(0,Qt::AscendingOrder);
-
+    setQuery("SELECT * FROM table1", libraryDb);
+    while(canFetchMore())
+    {
+        fetchMore();
+    }
 }
 LibrarySqlTableModel::~LibrarySqlTableModel()
 {
@@ -62,7 +55,6 @@ QMimeData* LibrarySqlTableModel::mimeData(const QModelIndexList &indexes) const
     QByteArray encodedData;
 
     QDataStream stream(&encodedData, QIODevice::WriteOnly);
-    QList<QMap<QString, QVariant> > records;
     QList<int> rows;
     foreach (QModelIndex index, indexes)
     {
@@ -75,21 +67,12 @@ QMimeData* LibrarySqlTableModel::mimeData(const QModelIndexList &indexes) const
         }
     }
     qSort(rows.begin(),rows.end());
+    stream << rows.size();
     for (int i = rows.size()-1; i>=0; i--)
     {
-        QMap<QString, QVariant> map;
-        for (int j=0; j < this->record(i).count(); j++)
-        {
-            map.insert(this->record(rows[i]).fieldName(j), QVariant(this->record(rows[i]).value(j)));
-        }
-        stream << map;
+        stream << this->record(rows[i]).value("IDSong").toInt();
     }
 
-    for (int i=0; i<records.size()-1; i+=2)
-    {
-        qDebug() << records[i] << records[i+1];
-    }
-    stream << records;
     mimeData->setData("application/test", encodedData);
 
     return mimeData;

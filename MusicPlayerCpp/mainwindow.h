@@ -4,7 +4,8 @@
 #include <QMainWindow>
 #include <QSignalMapper>
 #include <string>
-
+#include <QSqlDatabase>
+#include "playerwidget.h"
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -12,7 +13,12 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    PlayerWidget *leftPlayer;
+    PlayerWidget *rightPlayer;
 
+public slots:
+protected slots:
+    void closeEvent(QCloseEvent *event); Q_DECL_OVERRIDE
 private slots:
     void on_pushButton_clicked();
 

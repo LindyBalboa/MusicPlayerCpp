@@ -12,6 +12,7 @@ VLC::VLC(QObject *parent) : QObject(parent)
                };
     instance = libvlc_new(0,vlc_args);
     mediaPlayer = libvlc_media_player_new(instance);
+    libvlc_audio_set_volume(mediaPlayer, 50);
     updateDeviceMap(deviceMap);
     registerEvents();
 }
@@ -77,6 +78,11 @@ void VLC::stop()
     playerIsInit = false;
 }
 
+void VLC::setVolume(qint64 volume)
+{
+   libvlc_audio_set_volume(mediaPlayer, volume);
+}
+
 void VLC::next()
 {
 
@@ -91,7 +97,7 @@ void VLC::changeTrack(QString path)
 {
     stop();
     play();
-    qDebug() << libvlc_media_player_get_state(mediaPlayer);
+    //qDebug() << libvlc_media_player_get_state(mediaPlayer);
     libvlc_media_t *newMedia = libvlc_media_new_location(instance, ("file:///" + path.toStdString()).c_str() ) ;
     libvlc_media_player_set_media(mediaPlayer, newMedia);
     play();
@@ -135,7 +141,7 @@ void VLC::callbacks(const libvlc_event_t* event, void* ptr)
         self->emit endReached();
         break;
     case libvlc_MediaPlayerTimeChanged:
-        qDebug() << "time change";
+        //qDebug() << "time change";
         self->emit timeChanged( event->u.media_player_time_changed.new_time );
         break;
     case libvlc_MediaPlayerPositionChanged:

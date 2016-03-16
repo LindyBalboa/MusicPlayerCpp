@@ -1,13 +1,13 @@
 #include "Playerwidget.h"
 #include <QDebug>
 
-PlayerWidget::PlayerWidget(QString playerSide, QWidget *parent) : QWidget(parent)
+PlayerWidget::PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget *parent) : QWidget(parent)
 {
     vlc = new VLC(this);
 
     QVBoxLayout *centralLayout = new QVBoxLayout();
     setLayout(centralLayout);
-    playlist = new PlaylistWidget(playerSide);
+    playlist = new PlaylistWidget(playerSide, libraryDb,this);
     centralLayout->addWidget(playlist);
         connect(playlist, &PlaylistWidget::clicked, this, &trackSingleClicked);
         connect(playlist, &PlaylistWidget::doubleClicked, this, &trackDoubleClicked);
@@ -15,20 +15,26 @@ PlayerWidget::PlayerWidget(QString playerSide, QWidget *parent) : QWidget(parent
     PlaylistDelegate *delegate = new PlaylistDelegate(playlist);
     playlist->setItemDelegate(delegate);
 
+    QVBoxLayout *buttonsSliders = new QVBoxLayout();
+    QHBoxLayout *sliders = new QHBoxLayout();
     QHBoxLayout *buttons = new QHBoxLayout();
-    QPushButton *playButton = new QPushButton("play");
+    playButton = new QPushButton("Play");
+        playButton->setFocusPolicy(Qt::NoFocus);
         buttons->addWidget(playButton);
-        connect(playButton, &QPushButton::clicked, vlc, &VLC::setPause); //VLC::setPause() is responsible for switch between play and pause
-    QPushButton *stopButton = new QPushButton("stop");
+        connect(playButton, &QPushButton::released, this, &PlayerWidget::playClicked); //VLC::setPause() is responsible for switch between play and pause
+    QPushButton *stopButton = new QPushButton("Stop");
+        stopButton->setFocusPolicy(Qt::NoFocus);
         buttons->addWidget(stopButton);
-        connect(stopButton, &QPushButton::clicked, vlc, &VLC::stop);
-    QPushButton *nextButton = new QPushButton("next");
+        connect(stopButton, &QPushButton::released, vlc, &VLC::stop);
+    QPushButton *nextButton = new QPushButton("Next");
+        nextButton->setFocusPolicy(Qt::NoFocus);
         buttons->addWidget(nextButton);
-        //connect(nextButton, &QPushButton::clicked, this, &nextTrack);
-    QPushButton *previousButton = new QPushButton("prev");
+        //connect(nextButton, &QPushButton::released, this, &nextTrack);
+    QPushButton *previousButton = new QPushButton("Prev");
+        previousButton->setFocusPolicy(Qt::NoFocus);
         buttons->addWidget(previousButton);
-        //connect(previousButton, &QPushButton::clicked, this, &previousTrack);
-    centralLayout->addLayout(buttons);
+        //connect(previousButton, &QPushButton::released, this, &previousTrack);
+    buttonsSliders->addLayout(buttons);
 
     positionSlider = new SliderClass(Qt::Horizontal);
         connect(vlc,&VLC::timeChanged, this, &PlayerWidget::updateSlider);
@@ -36,8 +42,17 @@ PlayerWidget::PlayerWidget(QString playerSide, QWidget *parent) : QWidget(parent
         connect(vlc, &VLC::endReached, this, &PlayerWidget::loadNextTrack);
         connect(positionSlider, &SliderClass::sliderReleased, this, &PlayerWidget::positionSliderReleased);
         connect(positionSlider, &SliderClass::clicked, this, &PlayerWidget::positionSliderReleased);
-    centralLayout->addWidget(positionSlider);
+    sliders->addWidget(positionSlider);
 
+    volumeSlider = new SliderClass(Qt::Vertical);
+        volumeSlider->setMaximumHeight(50);
+        volumeSlider->setMinimumHeight(50);
+        volumeSlider->setRange(0,100);
+        connect(volumeSlider, &SliderClass::sliderMoved, vlc, &VLC::setVolume);
+        volumeSlider->setValue(50);
+    sliders->addWidget(volumeSlider);
+    buttonsSliders->addLayout(sliders);
+    centralLayout->addLayout(buttonsSliders);
 }
 
 PlayerWidget::~PlayerWidget()
@@ -51,6 +66,7 @@ void PlayerWidget::trackDoubleClicked(const QModelIndex &index)
     vlc->changeTrack(record.value("path").toString());
     playlist->currentTrackID = record.value("pl_id").toInt();
     playlist->viewport()->repaint();
+    this->playButton->setText("Pause");
 }
 
 void PlayerWidget::trackSingleClicked(const QModelIndex &index)
@@ -60,7 +76,10 @@ void PlayerWidget::trackSingleClicked(const QModelIndex &index)
 
 void PlayerWidget::updateSlider(qint64 currentTime)
 {
-    positionSlider->setValue(currentTime);
+    if (!positionSlider->isSliderDown() )
+    {
+        positionSlider->setValue(currentTime);
+    }
 }
 
 void PlayerWidget::lengthChanged(quint64 totalTime)
@@ -85,7 +104,7 @@ void PlayerWidget::loadNextTrack()
         if (playlist->currentTrackID == playlist->model()->data(index).toInt() ) //If pl_id in loop matches current track, load the very next track. Later for shuffle this belongs in a switch.
         {
             playlist->currentTrackID = playlist->model()->data(playlist->model()->index(i+1,0)).toInt(); //Change to immediate next row
-            vlc->changeTrack(playlist->model()->data(playlist->model()->index(i+1,23)).toString()); //Order VLC to change track. !!!Need to be careful about playback modes!!!
+            vlc->changeTrack(playlist->model()->data(playlist->model()->index(i+1,24)).toString()); //Order VLC to change track. !!!Need to be careful about playback modes!!!
             playlist->viewport()->update();
             break; //Needed so you don't try to load every track in the playlist and then end up with nothing :P
         }
@@ -111,4 +130,19 @@ void PlaylistDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     }
 }
 
+void PlayerWidget::playClicked()
+{
+    vlc->setPause();
+    if (this->playButton->text()=="Play")
+    {
+        this->playButton->setText("Pause");
+    }else
+    {
+        this->playButton->setText("Play");
+    }
+}
 
+void PlayerWidget::keyReleaseEvent(QKeyEvent *event)
+{
+    event->ignore();
+}

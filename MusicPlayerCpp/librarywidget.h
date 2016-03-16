@@ -9,12 +9,12 @@ class LibraryWidget : public QTableView
     Q_OBJECT
 
     public:
-        LibraryWidget(QWidget *parent =0);
+        LibraryWidget(QSqlDatabase database, QWidget *parent =0);
         ~LibraryWidget();
-
+        QSqlDatabase libraryDb;
 };
 
-class LibrarySqlTableModel : public QSqlTableModel
+class LibrarySqlTableModel : public QSqlQueryModel
 {
     Q_OBJECT
 
