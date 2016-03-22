@@ -5,6 +5,10 @@ SliderClass::SliderClass(Qt::Orientation orientation, QWidget *parent) : QSlider
     setFocusPolicy(Qt::NoFocus);
 
 }
+SliderClass::~SliderClass()
+{
+
+}
 
 void SliderClass::mousePressEvent(QMouseEvent * event )
   {

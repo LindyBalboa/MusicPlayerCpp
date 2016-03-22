@@ -1,6 +1,7 @@
-#include <librarywidget.h>
-#include <QHeaderView>
 #include <iostream>
+#include <librarywidget.h>
+
+#include <QHeaderView>
 
 
 LibraryWidget::LibraryWidget(QSqlDatabase database, QWidget *parent) : QTableView(parent)

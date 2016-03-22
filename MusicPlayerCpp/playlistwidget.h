@@ -1,34 +1,35 @@
 #ifndef PLAYLISTWIDGET_H
 #define PLAYLISTWIDGET_H
 
-#include <QTableView>
-#include <QSqlQueryModel>
-#include <QSqlDatabase>
-#include <QSqlRecord>
-#include <QMimeData>
+#include <playlistwidget.h>
+
 #include <QMap>
 #include <QMapIterator>
+#include <QMimeData>
 #include <QPainter>
-#include <playlistwidget.h>
+#include <QSqlDatabase>
 #include <QSqlQuery>
+#include <QSqlQueryModel>
+#include <QSqlRecord>
 #include <QSqlTableModel>
+#include <QTableView>
 
 class PlaylistModel : public QSqlTableModel
 {
     Q_OBJECT
 
-public:
-    PlaylistModel(QString playerSide, QWidget *parent =0, QSqlDatabase playlistDb=QSqlDatabase());
-protected:
-    QMimeData *mimeData(const QModelIndexList &indexes) const;
-    virtual QString selectStatement() const; Q_DECL_OVERRIDE
-    ~PlaylistModel();
-private:
-    QString _playerSide;
-    Qt::ItemFlags flags(const QModelIndex &index) const;
-    Qt::DropActions supportedDragActions() const;
-    Qt::DropActions supportedDropActions() const;
-    QStringList mimeTypes() const;
+    public:
+        PlaylistModel(QString playerSide, QWidget *parent =0, QSqlDatabase playlistDb=QSqlDatabase());
+        ~PlaylistModel();
+    protected:
+        QMimeData *mimeData(const QModelIndexList &indexes) const;
+        virtual QString selectStatement() const; Q_DECL_OVERRIDE
+    private:
+        QString _playerSide;
+        Qt::ItemFlags flags(const QModelIndex &index) const;
+        QStringList mimeTypes() const;
+        Qt::DropActions supportedDragActions() const;
+        Qt::DropActions supportedDropActions() const;
 };
 
 
@@ -41,9 +42,9 @@ class PlaylistWidget : public QTableView
         PlaylistModel* playlistModel;
         int currentTrackID;
         void saveNowPlaying();
-public slots:
+    public slots:
         void dragLeaveEvent(QDragLeaveEvent *event);
-private:
+    private:
         bool isDragging = false;
         QSqlDatabase _libraryDb;
         QSqlDatabase memDb;
@@ -56,7 +57,7 @@ private:
         void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
         void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
         void dropEvent(QDropEvent *event);
-protected:
+    protected:
         void keyReleaseEvent(QKeyEvent *);
 };
 

@@ -1,5 +1,7 @@
 #include "Playerwidget.h"
+
 #include <QDebug>
+#include <QTime>
 
 PlayerWidget::PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget *parent) : QWidget(parent)
 {
@@ -36,64 +38,42 @@ PlayerWidget::PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget 
         //connect(previousButton, &QPushButton::released, this, &previousTrack);
     buttonsSliders->addLayout(buttons);
 
+    currentPositionLabel = new QLabel();
+        currentPositionLabel->setText("00:00");
+        sliders->addWidget(currentPositionLabel);
     positionSlider = new SliderClass(Qt::Horizontal);
         connect(vlc,&VLC::timeChanged, this, &PlayerWidget::updateSlider);
         connect(vlc, &VLC::lengthChanged, this, &PlayerWidget::lengthChanged);
         connect(vlc, &VLC::endReached, this, &PlayerWidget::loadNextTrack);
         connect(positionSlider, &SliderClass::sliderReleased, this, &PlayerWidget::positionSliderReleased);
         connect(positionSlider, &SliderClass::clicked, this, &PlayerWidget::positionSliderReleased);
-    sliders->addWidget(positionSlider);
-
+        sliders->addWidget(positionSlider);
+    totalLengthLabel = new QLabel();
+        totalLengthLabel->setText("00:00");
+        sliders->addWidget(totalLengthLabel);
     volumeSlider = new SliderClass(Qt::Vertical);
         volumeSlider->setMaximumHeight(50);
         volumeSlider->setMinimumHeight(50);
         volumeSlider->setRange(0,100);
         connect(volumeSlider, &SliderClass::sliderMoved, vlc, &VLC::setVolume);
         volumeSlider->setValue(50);
-    sliders->addWidget(volumeSlider);
+        sliders->addWidget(volumeSlider);
     buttonsSliders->addLayout(sliders);
     centralLayout->addLayout(buttonsSliders);
 }
-
 PlayerWidget::~PlayerWidget()
 {
 }
-
-void PlayerWidget::trackDoubleClicked(const QModelIndex &index)
+void PlayerWidget::keyReleaseEvent(QKeyEvent *event)
 {
-    QSqlRecord record = playlist->playlistModel->record(index.row());
-    qDebug() << record.value("pl_id");
-    vlc->changeTrack(record.value("path").toString());
-    playlist->currentTrackID = record.value("pl_id").toInt();
-    playlist->viewport()->repaint();
-    this->playButton->setText("Pause");
+    event->ignore();
 }
-
-void PlayerWidget::trackSingleClicked(const QModelIndex &index)
-{
-    qDebug() << index.column();
-}
-
-void PlayerWidget::updateSlider(qint64 currentTime)
-{
-    if (!positionSlider->isSliderDown() )
-    {
-        positionSlider->setValue(currentTime);
-    }
-}
-
-void PlayerWidget::lengthChanged(quint64 totalTime)
+void PlayerWidget::lengthChanged(qint32 totalTime)
 {
     positionSlider->setRange(0,totalTime);
+    totalLengthLabel->setText(msToTimestamp(totalTime));
 }
-
-void PlayerWidget::positionSliderReleased()
-{
-    vlc->setPosition(positionSlider->value());
-}
-
-void PlayerWidget::loadNextTrack()
-{
+void PlayerWidget::loadNextTrack() {
     int id;
     positionSlider->setValue(0);
     vlc->setPosition(0);
@@ -111,12 +91,47 @@ void PlayerWidget::loadNextTrack()
         i++;
     }
 }
+void PlayerWidget::playClicked()
+{
+    vlc->setPause();
+    if (this->playButton->text()=="Play")
+    {
+        this->playButton->setText("Pause");
+    }else
+    {
+        this->playButton->setText("Play");
+    }
+
+}
+void PlayerWidget::positionSliderReleased()
+{
+    vlc->setPosition(positionSlider->value());
+}
+void PlayerWidget::updateSlider(qint32 currentTime)
+{
+    qDebug() << msToTimestamp(currentTime);
+    currentPositionLabel->setText(msToTimestamp(currentTime));
+    if (!positionSlider->isSliderDown() )
+    {
+        positionSlider->setValue(currentTime);
+    }
+}
+void PlayerWidget::trackDoubleClicked(const QModelIndex &index)
+{
+    QSqlRecord record = playlist->playlistModel->record(index.row());
+    vlc->changeTrack(record.value("path").toString());
+    playlist->currentTrackID = record.value("pl_id").toInt();
+    playlist->viewport()->repaint();
+    this->playButton->setText("Pause");
+}
+void PlayerWidget::trackSingleClicked(const QModelIndex &index)
+{
+}
 
 PlaylistDelegate::PlaylistDelegate(PlaylistWidget *parent) : QItemDelegate(parent)
 {
     _parent = parent;
 }
-
 void PlaylistDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     if (index.model()->data(index.model()->index(index.row(),0)).toInt() == _parent->currentTrackID)
@@ -130,19 +145,22 @@ void PlaylistDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     }
 }
 
-void PlayerWidget::playClicked()
+QString PlayerWidget::msToTimestamp(int ms)
 {
-    vlc->setPause();
-    if (this->playButton->text()=="Play")
+    int s = 0;
+    int m = 0;
+    int h = 0;
+    qDebug() << ms;
+    s = ms/1000;
+    if (s>60)
     {
-        this->playButton->setText("Pause");
-    }else
-    {
-        this->playButton->setText("Play");
+        m = s/60;
+        s = s%60;
+        if (m>60)
+        {
+            h = m/60;
+            m = m%60;
+        }
     }
-}
-
-void PlayerWidget::keyReleaseEvent(QKeyEvent *event)
-{
-    event->ignore();
+    return QString("%1:%2:%3").arg(h,2,10,QChar('0')).arg(m,2,10,QChar('0')).arg(s,2,10,QChar('0'));
 }

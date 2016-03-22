@@ -1,49 +1,56 @@
 #ifndef PLAYERWIDGET_H
 #define PLAYERWIDGET_H
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QPushButton>
-#include "sliderclass.h"
+
 #include <playlistwidget.h>
+#include "sliderclass.h"
 #include <vlc.h>
+
+#include <QHBoxLayout>
 #include <QItemDelegate>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QLabel>
 
 class PlayerWidget : public QWidget
 {
     Q_OBJECT
 
-public:
-    PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget *parent = 0);
-    ~PlayerWidget();
-    PlaylistWidget *playlist;
-    VLC *vlc;
+    public:
+        PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget *parent = 0);
+        ~PlayerWidget();
 
-private:
-    SliderClass *positionSlider;
-    SliderClass *volumeSlider;
-    QPushButton *playButton;
-    void loadNextTrack();
-public slots:
-    void trackSingleClicked(const QModelIndex &index);
-    void trackDoubleClicked(const QModelIndex &index);
-    void positionSliderReleased();
-    //void previousTrack();
-protected:
-    void keyReleaseEvent(QKeyEvent *event);
-private slots:
-    void updateSlider(qint64 time);
-    void lengthChanged(quint64 totalTime);
-    void playClicked();
+        PlaylistWidget *playlist;
+        VLC *vlc;
+
+    public slots:
+        void positionSliderReleased();
+        //void previousTrack();
+        void trackDoubleClicked(const QModelIndex &index);
+        void trackSingleClicked(const QModelIndex &index);
+    protected:
+        void keyReleaseEvent(QKeyEvent *event);
+    private:
+        QPushButton *playButton;
+        SliderClass *positionSlider;
+        SliderClass *volumeSlider;
+        void loadNextTrack();
+        QLabel *currentPositionLabel;
+        QLabel *totalLengthLabel;
+        QString msToTimestamp(int ms);
+    private slots:
+        void lengthChanged(qint32 totalTime);
+        void playClicked();
+        void updateSlider(qint32 time);
 };
 
 class PlaylistDelegate : public QItemDelegate
 {
     Q_OBJECT
 
-public:
-    explicit PlaylistDelegate(PlaylistWidget *parent = 0);
-    PlaylistWidget *_parent;
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    public:
+        explicit PlaylistDelegate(PlaylistWidget *parent = 0);
+        PlaylistWidget *_parent;
+        void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 };
 
 #endif // PLAYERWIDGET_H

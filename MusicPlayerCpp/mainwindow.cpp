@@ -1,20 +1,20 @@
 #include "mainwindow.h"
-#include <QDebug>
-#include <QtSql>
-#include <iostream>
-#include <QtMultimedia/QMediaPlayer>
 #include "librarywidget.h"
-#include <QActionGroup>
+#include <iostream>
 #include <vlc.h>
+
 #include <iterator>
-#include <QMenuBar>
-#include <QSplitter>
-#include <QVBoxLayout>
+#include <QActionGroup>
 #include <QHBoxLayout>
+#include <QDebug>
 #include <QMenuBar>
-#include <QTreeView>
-#include <QTableView>
 #include <QPushButton>
+#include <QSplitter>
+#include <QtSql>
+#include <QtMultimedia/QMediaPlayer>
+#include <QTableView>
+#include <QTreeView>
+#include <QVBoxLayout>
 using namespace std;
 
 
@@ -69,16 +69,16 @@ MainWindow::MainWindow(QWidget *parent) :
     rightPlayer = new PlayerWidget("right", libraryDb);
     playerSplitter->addWidget(rightPlayer);
 
-    VLC* vlc = new VLC();  //Initialize the VLC class which controls both LEFT and RIGHT players
     //qDebug("AUDIO OUTPUTS");
     QMenu* menuRight_Player_Devices;   //Prep to dynamically create device menus after device detection
     QMenu* menuLeft_Player_Devices;
     QAction* tempAction;
     QActionGroup* rightPlayerDeviceActionGroup = new QActionGroup(this);
     QActionGroup* leftPlayerDeviceActionGroup = new QActionGroup(this);
-    QSignalMapper *deviceMenuSignalMapper = new QSignalMapper(this);
+    QSignalMapper *deviceMenuSignalMapperLeft = new QSignalMapper(this);
+    QSignalMapper *deviceMenuSignalMapperRight = new QSignalMapper(this);
 
-    devices = vlc->getDevices();
+    devices = leftPlayer->vlc->getDevices();
     QMap<QString,QString>::iterator i;  //Build the device menus dynamically
     for (i = devices.begin(); i != devices.end(); i++)
     {
@@ -86,25 +86,23 @@ MainWindow::MainWindow(QWidget *parent) :
 
         tempAction = rightPlayerDeviceActionGroup->addAction(i.key());
         rightPlayerDeviceActionGroup->addAction(tempAction);
-        connect(tempAction,SIGNAL(triggered()),deviceMenuSignalMapper, SLOT(map()));
-        deviceMenuSignalMapper->setMapping(tempAction,tempAction->text().insert(0,"R"));   //Insert R or L at front of device name to carry information on which player
+        connect(tempAction,SIGNAL(triggered()),deviceMenuSignalMapperRight, SLOT(map()));
+        deviceMenuSignalMapperRight->setMapping(tempAction,tempAction->text());
+        connect(deviceMenuSignalMapperRight, static_cast<void (QSignalMapper::*)(const QString &)>(&QSignalMapper::mapped),rightPlayer->vlc, &VLC::handleDeviceChange); //Maps all device actions to one handler
 
         tempAction = leftPlayerDeviceMenu->addAction(i.key());
         leftPlayerDeviceActionGroup->addAction(tempAction);
-        connect(tempAction,SIGNAL(triggered()),deviceMenuSignalMapper, SLOT(map()));
-        deviceMenuSignalMapper->setMapping(tempAction,tempAction->text().insert(0,"L"));
+        connect(tempAction,SIGNAL(triggered()),deviceMenuSignalMapperLeft, SLOT(map()));
+        deviceMenuSignalMapperLeft->setMapping(tempAction,tempAction->text());
+        connect(deviceMenuSignalMapperLeft, static_cast<void (QSignalMapper::*)(const QString &)>(&QSignalMapper::mapped),leftPlayer->vlc, &VLC::handleDeviceChange); //Maps all device actions to one handler
     }
-    connect(deviceMenuSignalMapper, static_cast<void (QSignalMapper::*)(const QString &)>(&QSignalMapper::mapped),vlc, &VLC::handleDeviceChange); //Maps all device actions to one handler
 
 
 }
-
-
 
 MainWindow::~MainWindow()
 {
 }
-
 
 void MainWindow::on_pushButton_clicked()
 {

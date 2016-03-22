@@ -1,5 +1,5 @@
-#include "vlc.h"
-#include "vlc/vlc.h"
+#include "vlc.h" //header for this file
+#include "vlc/vlc.h" //header that includes all the libvlc.dll required headers
 #include <QDebug>
 
 VLC::VLC(QObject *parent) : QObject(parent)
@@ -17,46 +17,17 @@ VLC::VLC(QObject *parent) : QObject(parent)
     registerEvents();
 }
 
-void VLC::updateDeviceMap(QMap<QString, QString> &deviceMap)
-{
-    deviceMap.clear();
-    libvlc_audio_output_device_t* devices = libvlc_audio_output_device_list_get(instance,"directx");
-    while(devices!=NULL)
-    {
-       deviceMap[devices->psz_description] = devices->psz_device ;
-       devices = devices->p_next;
-    }
-}
-
-void VLC::handleDeviceChange(QString device) //For selecting playback device from Audio menu
-{
-    //QChar whichPlayer = device[0];
-    //device = device.remove(0,1);
-    device = deviceMap[device];
-    float pos = libvlc_media_player_get_position(mediaPlayer);
-    libvlc_media_player_stop(mediaPlayer);
-    libvlc_audio_output_device_set(mediaPlayer, "directx", device.toStdString().c_str());
-    libvlc_media_player_play(mediaPlayer);
-    libvlc_media_player_set_position(mediaPlayer,pos);
-}
-QMap<QString, QString> VLC::getDevices()
-{
-    return deviceMap;
-}
-
 void VLC::play()
 {
    libvlc_media_player_play(mediaPlayer);
    doPause = 1;
    playerIsInit = true;
 }
-
 void VLC::pause()
 {
    libvlc_media_player_pause(mediaPlayer);
    doPause = 0;
 }
-
 void VLC::setPause()
 {
    if (playerIsInit==true)
@@ -70,29 +41,20 @@ void VLC::setPause()
        doPause=1;
    }
 }
-
 void VLC::stop()
 {
     libvlc_media_player_stop(mediaPlayer);
     doPause = 0;
     playerIsInit = false;
 }
-
-void VLC::setVolume(qint64 volume)
-{
-   libvlc_audio_set_volume(mediaPlayer, volume);
-}
-
 void VLC::next()
 {
 
 }
-
 void VLC::previous()
 {
 
 }
-
 void VLC::changeTrack(QString path)
 {
     stop();
@@ -101,6 +63,19 @@ void VLC::changeTrack(QString path)
     libvlc_media_t *newMedia = libvlc_media_new_location(instance, ("file:///" + path.toStdString()).c_str() ) ;
     libvlc_media_player_set_media(mediaPlayer, newMedia);
     play();
+}
+void VLC::setVolume(qint64 volume)
+{
+   libvlc_audio_set_volume(mediaPlayer, volume);
+}
+void VLC::setPosition(qint64 currentTime)
+{
+    libvlc_media_player_set_time(mediaPlayer, currentTime);
+}
+
+QMap<QString, QString> VLC::getDevices()
+{
+    return deviceMap;
 }
 
 void VLC::registerEvents()
@@ -119,7 +94,6 @@ void VLC::registerEvents()
     libvlc_event_attach( eventManager, libvlc_MediaPlayerPausableChanged, callbacks, this );
     libvlc_event_attach( eventManager, libvlc_MediaPlayerSeekableChanged, callbacks, this );
 }
-
 void VLC::callbacks(const libvlc_event_t* event, void* ptr)
 {
     VLC* self = reinterpret_cast<VLC*>( ptr );
@@ -175,8 +149,30 @@ void VLC::callbacks(const libvlc_event_t* event, void* ptr)
         break;
     }
 }
-
-void VLC::setPosition(qint64 currentTime)
+void VLC::updateDeviceMap(QMap<QString, QString> &deviceMap)
 {
-    libvlc_media_player_set_time(mediaPlayer, currentTime);
+    deviceMap.clear();
+    libvlc_audio_output_device_t* devices = libvlc_audio_output_device_list_get(instance,"directx");
+    while(devices!=NULL)
+    {
+       deviceMap[devices->psz_description] = devices->psz_device ;
+       devices = devices->p_next;
+    }
+}
+void VLC::handleDeviceChange(QString device) //For selecting playback device from Audio menu
+{
+    //QChar whichPlayer = device[0];
+    //device = device.remove(0,1);
+    device = deviceMap[device];
+    float pos = libvlc_media_player_get_position(mediaPlayer);
+    libvlc_media_player_stop(mediaPlayer);
+    libvlc_audio_output_device_set(mediaPlayer, "directx", device.toStdString().c_str());
+    libvlc_media_player_play(mediaPlayer);
+    libvlc_media_player_set_position(mediaPlayer,pos);
+}
+
+int VLC::getLength()
+{
+    qDebug() << "DUR" << libvlc_media_get_duration(libvlc_media_player_get_media(mediaPlayer));
+    return libvlc_media_get_duration(libvlc_media_player_get_media(mediaPlayer) );
 }
