@@ -7,9 +7,9 @@
 
 #include <QHBoxLayout>
 #include <QItemDelegate>
+#include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QLabel>
 
 class PlayerWidget : public QWidget
 {
@@ -22,7 +22,8 @@ class PlayerWidget : public QWidget
         PlaylistWidget *playlist;
         VLC *vlc;
 
-    public slots:
+        void stopClicked();
+public slots:
         void positionSliderReleased();
         //void previousTrack();
         void trackDoubleClicked(const QModelIndex &index);

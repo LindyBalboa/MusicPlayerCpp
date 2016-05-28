@@ -7,6 +7,7 @@
 #include <QMapIterator>
 #include <QMimeData>
 #include <QPainter>
+#include <QPoint>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
@@ -19,6 +20,7 @@ class PlaylistModel : public QSqlTableModel
     Q_OBJECT
 
     public:
+        QVariantList playlistIDList;
         PlaylistModel(QString playerSide, QWidget *parent =0, QSqlDatabase playlistDb=QSqlDatabase());
         ~PlaylistModel();
     protected:
@@ -32,7 +34,6 @@ class PlaylistModel : public QSqlTableModel
         Qt::DropActions supportedDropActions() const;
 };
 
-
 class PlaylistWidget : public QTableView
 {
     Q_OBJECT
@@ -41,10 +42,10 @@ class PlaylistWidget : public QTableView
         PlaylistWidget(QString playerSide, QSqlDatabase &libraryDb,  QWidget *parent = 0);
         PlaylistModel* playlistModel;
         int currentTrackID;
-        void saveNowPlaying();
     public slots:
         void dragLeaveEvent(QDragLeaveEvent *event);
     private:
+        QPoint startDragPos;
         bool isDragging = false;
         QSqlDatabase _libraryDb;
         QSqlDatabase memDb;
@@ -56,6 +57,7 @@ class PlaylistWidget : public QTableView
         void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
         void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
         void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+        void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
         void dropEvent(QDropEvent *event);
     protected:
         void keyReleaseEvent(QKeyEvent *);

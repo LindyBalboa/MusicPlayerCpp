@@ -14,14 +14,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    librarywidget.cpp \
     vlc.cpp \
     playlistwidget.cpp \
     playerwidget.cpp \
-    sliderclass.cpp
+    sliderclass.cpp \
+    filesystemscanner.cpp \
+    librarywidgets.cpp
 
 HEADERS  += mainwindow.h \
-        librarywidget.h \
     vlc/vlc.h \
     vlc/deprecated.h \
     vlc/libvlc.h \
@@ -37,16 +37,19 @@ HEADERS  += mainwindow.h \
     vlc.h \
     playlistwidget.h \
     playerwidget.h \
-    sliderclass.h
+    sliderclass.h \
+    filesystemscanner.h \
+    librarywidgets.h
 
 FORMS    +=
 
-LIBS += -LC:\Users\Conner\Documents\MusicPlayerCpp\MusicPlayerCpp -llibvlc
-LIBS += -LC:\Users\Conner\Documents\MusicPlayerCpp\MusicPlayerCpp -llibmysql
+LIBS += -L"$$_PRO_FILE_PWD_/" -lvlc
+unix|win32: LIBS += -L"$$_PRO_FILE_PWD_/" -ltaglib
 
 OTHER_FILES += database.db
 
 INCLUDEPATH += C:\Users\Conner\Documents\MusicPlayerCpp\MusicPlayerCpp\VLC \
+INCLUDEPATH += "C:/Users/Conner/Documents/MusicPlayerCpp/MusicPlayerCpp/taglib"
 
 DISTFILES += \
     libvlc.lib \

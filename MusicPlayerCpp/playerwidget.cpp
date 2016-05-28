@@ -5,17 +5,40 @@
 
 PlayerWidget::PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget *parent) : QWidget(parent)
 {
+    //this->setStyleSheet("QSlider::handle:horizontal{ background: #ffffff;\
+                                                            border: 1px solid #777;\
+                                                            height: 10px;\
+                                                            margin: -6px 0px;\
+                                                            width: 3px;\
+                                                            }\
+                           QSlider::groove:horizontal {background: lightgray ;\
+                                                       height: 2px;\
+                                                       position: absolute;\
+                                                       left: 4px; right: 4px;\
+                                                       }\
+                           QSlider::handle:vertical{ background: #ffffff;\
+                                                     border: 1px solid #777;\
+                                                     width: 10px;\
+                                                     margin: 0 -6px 0;\
+                                                     height: 3px;\
+                                                    }\
+                           QSlider::groove:vertical {background: lightgray ;\
+                                                     width: 2px;\
+                                                     position: absolute;\
+                                                     bottom: 20px;\
+                                                     height: 30px;\
+                                                    }\
+                          ");
     vlc = new VLC(this);
 
     QVBoxLayout *centralLayout = new QVBoxLayout();
     setLayout(centralLayout);
     playlist = new PlaylistWidget(playerSide, libraryDb,this);
-    centralLayout->addWidget(playlist);
+        centralLayout->addWidget(playlist);
         connect(playlist, &PlaylistWidget::clicked, this, &trackSingleClicked);
         connect(playlist, &PlaylistWidget::doubleClicked, this, &trackDoubleClicked);
-
-    PlaylistDelegate *delegate = new PlaylistDelegate(playlist);
-    playlist->setItemDelegate(delegate);
+        PlaylistDelegate *delegate = new PlaylistDelegate(playlist);
+        playlist->setItemDelegate(delegate);
 
     QVBoxLayout *buttonsSliders = new QVBoxLayout();
     QHBoxLayout *sliders = new QHBoxLayout();
@@ -27,7 +50,7 @@ PlayerWidget::PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget 
     QPushButton *stopButton = new QPushButton("Stop");
         stopButton->setFocusPolicy(Qt::NoFocus);
         buttons->addWidget(stopButton);
-        connect(stopButton, &QPushButton::released, vlc, &VLC::stop);
+        connect(stopButton, &QPushButton::released, this, &PlayerWidget::stopClicked);
     QPushButton *nextButton = new QPushButton("Next");
         nextButton->setFocusPolicy(Qt::NoFocus);
         buttons->addWidget(nextButton);
@@ -74,19 +97,23 @@ void PlayerWidget::lengthChanged(qint32 totalTime)
     totalLengthLabel->setText(msToTimestamp(totalTime));
 }
 void PlayerWidget::loadNextTrack() {
-    int id;
+    //qDebug() << "load";
     positionSlider->setValue(0);
+    currentPositionLabel->setText("00:00");
     vlc->setPosition(0);
     int i = 0;
-    while (i<= playlist->model()->rowCount())
+    while (i<=playlist->model()->rowCount() )
     {
-        QModelIndex index = playlist->model()->index(i,0); //Loop through the pl_id of every track (how can this be better?
-        if (playlist->currentTrackID == playlist->model()->data(index).toInt() ) //If pl_id in loop matches current track, load the very next track. Later for shuffle this belongs in a switch.
+        QModelIndex index = playlist->model()->index(i,0);  //Loop through the pl_id of every track (how can this be better?
+        //qDebug() <<  playlist->currentTrackID << playlist->model()->data(index).toInt();  //If pl_id in loop matches current track, load the very next track. Later for shuffle this belongs in a switch.
+        if (playlist->currentTrackID == playlist->model()->data(index).toInt() )  //If pl_id in loop matches current track, load the very next track. Later for shuffle this belongs in a switch.
         {
-            playlist->currentTrackID = playlist->model()->data(playlist->model()->index(i+1,0)).toInt(); //Change to immediate next row
-            vlc->changeTrack(playlist->model()->data(playlist->model()->index(i+1,24)).toString()); //Order VLC to change track. !!!Need to be careful about playback modes!!!
+            index = playlist->model()->index(i+1,0);
+            QSqlRecord record = playlist->playlistModel->record(index.row());
+            playlist->currentTrackID = record.value("IDNowPlaying").toInt(); //Change to immediate next row
+            vlc->changeTrack(record.value("path").toString());
             playlist->viewport()->update();
-            break; //Needed so you don't try to load every track in the playlist and then end up with nothing :P
+            break;  //Needed so you don't try to load every track in the playlist and then end up with nothing :P
         }
         i++;
     }
@@ -103,13 +130,19 @@ void PlayerWidget::playClicked()
     }
 
 }
+void PlayerWidget::stopClicked()
+{
+    vlc->stop();
+    positionSlider->setValue(0);
+    currentPositionLabel->setText("00:00");
+    this->playButton->setText("Play");
+}
 void PlayerWidget::positionSliderReleased()
 {
     vlc->setPosition(positionSlider->value());
 }
 void PlayerWidget::updateSlider(qint32 currentTime)
 {
-    qDebug() << msToTimestamp(currentTime);
     currentPositionLabel->setText(msToTimestamp(currentTime));
     if (!positionSlider->isSliderDown() )
     {
@@ -120,7 +153,7 @@ void PlayerWidget::trackDoubleClicked(const QModelIndex &index)
 {
     QSqlRecord record = playlist->playlistModel->record(index.row());
     vlc->changeTrack(record.value("path").toString());
-    playlist->currentTrackID = record.value("pl_id").toInt();
+    playlist->currentTrackID = record.value("IDNowPlaying").toInt();
     playlist->viewport()->repaint();
     this->playButton->setText("Pause");
 }
@@ -150,7 +183,6 @@ QString PlayerWidget::msToTimestamp(int ms)
     int s = 0;
     int m = 0;
     int h = 0;
-    qDebug() << ms;
     s = ms/1000;
     if (s>60)
     {
@@ -160,7 +192,8 @@ QString PlayerWidget::msToTimestamp(int ms)
         {
             h = m/60;
             m = m%60;
+            return QString("%1:%2:%3").arg(h,2,10,QChar('0')).arg(m,2,10,QChar('0')).arg(s,2,10,QChar('0'));
         }
     }
-    return QString("%1:%2:%3").arg(h,2,10,QChar('0')).arg(m,2,10,QChar('0')).arg(s,2,10,QChar('0'));
+    return QString("%1:%2").arg(m,2,10,QChar('0')).arg(s,2,10,QChar('0'));
 }

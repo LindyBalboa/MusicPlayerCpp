@@ -2,11 +2,15 @@
 #define MAINWINDOW_H
 
 #include "playerwidget.h"
+#include "filesystemscanner.h"
 #include <string>
 
+#include <QFileSystemModel>
 #include <QMainWindow>
+#include <QProgressBar>
 #include <QSignalMapper>
 #include <QSqlDatabase>
+#include <QThread>
 #include <QtMultimedia/QMediaPlayer>
 
 class MainWindow : public QMainWindow
@@ -20,8 +24,17 @@ class MainWindow : public QMainWindow
         PlayerWidget *leftPlayer;
         PlayerWidget *rightPlayer;
 
-    public slots:
-    protected slots:
+public slots:
+protected:
+        QProgressBar *progressBar = new QProgressBar();
+        QSqlDatabase libraryDb;
+        FileSystemScanner *scanner;
+        QThread thread;
+        void databaseScanFinished();
+        void updateScannerTotalFileCount(int count);
+        void updateScannerCurrentFileCount(int count);
+protected slots:
+        void databaseScan();
         void closeEvent(QCloseEvent *event); Q_DECL_OVERRIDE
     private:
         std::map <QString, QString> deviceMap;
@@ -32,6 +45,7 @@ class MainWindow : public QMainWindow
 
 
 };
+
 
 
 #endif // MAINWINDOW_H

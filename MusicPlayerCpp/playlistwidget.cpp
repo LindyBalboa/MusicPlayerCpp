@@ -1,6 +1,7 @@
 #include "playlistwidget.h"
-
+#include <QApplication>
 #include <QDebug>
+#include <QDrag>
 #include <QDragEnterEvent>
 #include <QFont>
 #include <QHeaderView>
@@ -12,27 +13,14 @@ PlaylistWidget::PlaylistWidget(QString playerSide, QSqlDatabase &libraryDb, QWid
 {
     _playerSide = playerSide;
     setStyleSheet("QTableView:item:selected:active{\
-                                                                color: black; \
-                                                                background: qlineargradient(x1:1, y1:1, x2:1, y2:0, stop:0 #E0F0FF, stop:0.85 #E0F0FF, stop:1 white);\
-                                                                border-top: 1px solid #A3D1FF;\
-                                                                border-bottom: 1px solid #A3D1FF;\
-                                                                }\
+                  color: black; \
+                  background: qlineargradient(x1:1, y1:1, x2:1, y2:0, stop:0 #E0F0FF, stop:0.85 #E0F0FF, stop:1 white);\
+                  border-top: 1px solid #A3D1FF;\
+                  border-bottom: 1px solid #A3D1FF;\
+                  }\
                   ");
 
     _libraryDb = libraryDb;
-    memDb = QSqlDatabase::addDatabase("QSQLITE", _playerSide);
-    memDb.setDatabaseName(":memory:");
-    memDb.open();
-    QSqlQuery query(memDb);
-    query.exec("ATTACH DATABASE \"database.db\" as \"library\" ");
-    _libraryDb.transaction();
-    _libraryDb.commit();
-    memDb.transaction();
-    query.exec(QString("create table left(IDNowPlaying INTEGER,\
-                                        IDSong INTEGER)"));
-    query.exec("INSERT INTO left SELECT * FROM library.left");
-    memDb.commit();
-    query.clear();
     playlistModel = new PlaylistModel(_playerSide, this, _libraryDb);
     playlistModel->setTable(_playerSide);
     setModel(playlistModel);
@@ -41,25 +29,27 @@ PlaylistWidget::PlaylistWidget(QString playerSide, QSqlDatabase &libraryDb, QWid
 
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
-    setDropIndicatorShown(true);
-    viewport()->setAcceptDrops(true);
     setDragDropMode(QAbstractItemView::DragDrop);
     //verticalHeader()->hide();
     verticalHeader()->setDefaultSectionSize(15);
     horizontalHeader()->setSectionsMovable(true);
     horizontalHeader()->setFixedHeight(20);
     horizontalHeader()->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    horizontalHeader()->setHighlightSections(false);
     setFocusPolicy(Qt::StrongFocus);
     setDragEnabled(true);
-    setShowGrid(false);
+    setDropIndicatorShown(true);
+    setWordWrap(false);
+    viewport()->setAcceptDrops(true);
     setAcceptDrops(true);
+    setShowGrid(false);
     setEditTriggers(QAbstractItemView::SelectedClicked);
     show();
     }
 void PlaylistWidget::dragEnterEvent(QDragEnterEvent *event)
 {
     event->accept();
-    isDragging = true;
+    isDragging = true;  //Used by PlaylistWidget::paintEvent to draw black drop line
 }
 void PlaylistWidget::dragLeaveEvent(QDragLeaveEvent *event)
 {
@@ -70,13 +60,12 @@ void PlaylistWidget::dragMoveEvent(QDragMoveEvent *event)
 {
     dragHoverIndex = indexAt(event->pos());
     QRect rect(0,\
-                        rowViewportPosition(dragHoverIndex.row()),\
-                        viewport()->width(),\
-                        15\
-               );
+              rowViewportPosition(dragHoverIndex.row()),\
+              viewport()->width(),\
+              15\
+              );
     dropIndicatorPosition = position(event->pos(), rect, dragHoverIndex);
-    //qDebug() << "DIP" << dropIndicatorPosition;
-    if (dropIndicatorPosition == QAbstractItemView::AboveItem)
+    if (dropIndicatorPosition == QAbstractItemView::AboveItem) //***This looks pointless. What purpose?
     {
         event->accept();
     } else if (dropIndicatorPosition == QAbstractItemView::BelowItem)
@@ -93,14 +82,13 @@ void PlaylistWidget::dropEvent(QDropEvent *event)
     QModelIndex dropIndex = indexAt(event->pos());
     int dropRow;
     QRect rect(0,\
-                        rowViewportPosition(dragHoverIndex.row()),\
-                        viewport()->width(),\
-                        15\
-               );
+               rowViewportPosition(dragHoverIndex.row()),\
+               viewport()->width(),\
+               15\
+              );
     dropIndicatorPosition = position(event->pos(), rect, dropIndex);
         if (dropIndex.row()==-1)
         {
-            qDebug() << "APPEND";
             dropRow = playlistModel->rowCount();
         }else if (dropIndicatorPosition == QAbstractItemView::AboveItem)
         {
@@ -112,21 +100,16 @@ void PlaylistWidget::dropEvent(QDropEvent *event)
 
     if (event->source() == this)
     {
-        QModelIndexList selectedIndexesRows = this->selectionModel()->selectedRows(); //return 0 column QModelINdex for each row
+        QModelIndexList selectedIndexesRows = this->selectionModel()->selectedRows();  //return 0 column QModelIndex for each row
         QList<int> selectedRows;
         foreach(QModelIndex index, selectedIndexesRows)
         {
             selectedRows << index.row();
         }
-        qDebug() << selectedRows;
         qSort(selectedRows.begin(), selectedRows.end(), qGreater<int>() );
         foreach(int row, selectedRows)
         {
-            exec = QString("DELETE FROM %1 WHERE IDNowPlaying = %2").arg(_playerSide,QString::number(row+1));
-            query.exec(exec);
-            exec = QString("UPDATE %1 SET IDNowPlaying = IDNowPlaying - 1 WHERE IDNowPlaying > %2").arg(_playerSide,QString::number(row+1));
-            query.exec(exec);
-
+            playlistModel->playlistIDList.removeAt(row);
             if (row < dropRow)
             {
                 dropRow = dropRow - 1;
@@ -140,69 +123,88 @@ void PlaylistWidget::dropEvent(QDropEvent *event)
     const QMimeData *mimeData = event->mimeData();
     QByteArray data = mimeData->data("application/test");
     QDataStream outStream(data);
-    int numberOfRows;
-    outStream >> numberOfRows;
-    qDebug() << "#Ro" << numberOfRows;
-    exec = QString("UPDATE %1 SET IDNowPlaying = -(IDNowPlaying + %2) where IDNowPlaying > %3").arg(_playerSide,QString::number(numberOfRows),QString::number(dropRow));
+    QVariantList newIdList;
+    outStream >> newIdList;
+    playlistModel->playlistIDList = playlistModel->playlistIDList.mid(0, dropRow) + newIdList + playlistModel->playlistIDList.mid(dropRow,-1);
+    exec = "delete from " + _playerSide; //***Clears and rebuilds the playlist table on drops. Easier to manipulate list order than maintain DB? How does it affect drag/drops if sorted by column in view?
     query.exec(exec);
-    exec = QString("UPDATE %1 SET IDNowPlaying = -IDNowPlaying WHERE IDNowPlaying<0").arg(_playerSide);
-    query.exec(exec);
+    query.prepare("insert into " + _playerSide + " (IDSong) values (?)");
+    query.addBindValue(playlistModel->playlistIDList);
+    query.execBatch();
 
-    int j=numberOfRows; //Doing it this way is necessary to maintiain the proper insertion order
-    while (j>0)
-    {
-        int IDSong;
-        outStream >> IDSong;
-        exec = QString("INSERT INTO %1 (IDNowPlaying, IDSong) VALUES (%2, %3)").arg(_playerSide, QString::number(dropRow+j), QString::number(IDSong));
-        query.exec(exec);
-        j--;
-    }
-    _libraryDb.commit();
     playlistModel->select();
     isDragging = false;
+    while(playlistModel->canFetchMore())
+    {
+        playlistModel->fetchMore();
+    }
     this->viewport()->update();
+    _libraryDb.commit();
 }
 void PlaylistWidget::keyReleaseEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_Delete)
+    if (event->key() == Qt::Key_Delete)  //***Again, if sorted by column in view, this might break
     {
         _libraryDb.transaction();
         QSqlQuery query(_libraryDb);
-        QModelIndexList selectedIndexesRows = this->selectionModel()->selectedRows(); //return 0 column QModelINdex for each row
+        QModelIndexList selectedIndexesRows = this->selectionModel()->selectedRows();  //return 0 column QModelINdex for each row
         QList<int> selectedRows;
         foreach(QModelIndex index, selectedIndexesRows)
         {
             selectedRows << index.row();
         }
         qSort(selectedRows.begin(), selectedRows.end(), qGreater<int>() );
+        qDebug() << playlistModel->playlistIDList;
         foreach(int row, selectedRows)
         {
-            query.exec(QString("DELETE FROM %1 WHERE IDNowPlaying = %2").arg(_playerSide,QString::number(row+1)));
-            query.exec(QString("UPDATE %1 SET IDNowPlaying = IDNowPlaying - 1 WHERE IDNowPlaying > %2").arg(_playerSide,QString::number(row+1)));
+            playlistModel->playlistIDList.removeAt(row);
         }
-        _libraryDb.commit();
+        qDebug() << playlistModel->playlistIDList;
+
+        query.exec("delete from " + _playerSide);
+        query.prepare("insert into " + _playerSide + " (IDSong) values (?)");
+        query.addBindValue(playlistModel->playlistIDList);
+        query.execBatch();
+
         this->playlistModel->select();
         while(this->playlistModel->canFetchMore())
         {
             this->playlistModel->fetchMore();
         }
         this->viewport()->update();
+        _libraryDb.commit();
     }else
     {
-    event->ignore();
+        event->ignore();
     }
 }
 void PlaylistWidget::mousePressEvent(QMouseEvent *event)
 {
+    startDragPos = event->pos();  //Used for Manhatten length to start dragging
     QTableView::mousePressEvent(event);
+}
+
+void PlaylistWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    if (event->buttons() & Qt::LeftButton)
+    {
+        int distance = (event->pos() - startDragPos).manhattanLength();
+        if (distance >= QApplication::startDragDistance())
+        {
+            QDrag *drag = new QDrag(this);
+            QModelIndexList selectedRows = this->selectionModel()->selectedRows();
+            QMimeData *mimeData = this->model()->mimeData(selectedRows);
+            drag->setMimeData(mimeData);
+            drag->exec(Qt::CopyAction);
+        }
+    }
+
 }
 void PlaylistWidget::paintEvent(QPaintEvent *event)
 {
     QTableView::paintEvent(event);
     if (isDragging==true)
     {
-        //qDebug() << "DHI" << dragHoverIndex;
-        //qDebug() << dragHoverIndex;
         QPainter qP(viewport());
         QPen pen(Qt::black, 1.5, Qt::SolidLine);
         qP.setPen(pen);
@@ -249,14 +251,17 @@ QAbstractItemView::DropIndicatorPosition PlaylistWidget::position(const QPoint &
 
     return r;
 }
-void PlaylistWidget::saveNowPlaying()
-{
-}
 
 PlaylistModel::PlaylistModel(QString playerSide, QWidget *parent, QSqlDatabase libraryDb) : QSqlTableModel(parent, libraryDb)
 {
     _playerSide = playerSide;
     setSort(0, Qt::AscendingOrder);
+    QSqlQuery query(libraryDb);
+    query.exec("SELECT * from " + _playerSide);
+    while(query.next())
+    {
+        playlistIDList.append(query.value(1).toInt());  //Rebuild list from database upon loading
+    }
 }
 PlaylistModel::~PlaylistModel()
 {
@@ -272,6 +277,7 @@ QMimeData* PlaylistModel::mimeData(const QModelIndexList &indexes) const
 
     QDataStream stream(&encodedData, QIODevice::WriteOnly);
     QList<int> rows;
+    QVariantList IDSongList;
     foreach (QModelIndex index, indexes)
     {
         if (index.isValid())
@@ -282,12 +288,13 @@ QMimeData* PlaylistModel::mimeData(const QModelIndexList &indexes) const
             }
         }
     }
-    qSort(rows.begin(),rows.end());
-    stream << rows.size() ;
     for (int i = rows.size()-1; i>=0; i--)
     {
-        stream << this->record(rows[i]).value("IDSong").toInt();
+        IDSongList << this->record(rows[i]).value("IDSong").toInt();
     }
+    for(int k = 0; k < (IDSongList.size()/2); k++)
+        IDSongList.swap(k,IDSongList.size()-(1+k));
+    stream << IDSongList;
 
     mimeData->setData("application/test", encodedData);
 
@@ -299,7 +306,7 @@ QStringList PlaylistModel::mimeTypes() const
 }
 QString PlaylistModel::selectStatement() const
 {
-    return QString("SELECT * FROM " + _playerSide + " A LEFT JOIN table1 B ON A.IDSong = B.IDSong ORDER BY IDNowPlaying ASC");
+    return QString("SELECT * FROM " + _playerSide + " A LEFT JOIN Songs B ON A.IDSong = B.IDSong ORDER BY IDNowPlaying ASC");
 }
 Qt::DropActions PlaylistModel::supportedDragActions() const
 {

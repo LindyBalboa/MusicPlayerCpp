@@ -4,24 +4,21 @@
 
 VLC::VLC(QObject *parent) : QObject(parent)
 {
-    //
-    //VLC Set up begins here
-    //
     const char * const vlc_args[] = {
              // "--verbose=2", //be much more verbose then normal for debugging purpose
                };
     instance = libvlc_new(0,vlc_args);
     mediaPlayer = libvlc_media_player_new(instance);
     libvlc_audio_set_volume(mediaPlayer, 50);
-    updateDeviceMap(deviceMap);
-    registerEvents();
+    updateDeviceMap(deviceMap);  //deviceMap by reference
+    registerEvents(); //Connects libvlc signals to handler VLC::callbacks
 }
 
 void VLC::play()
 {
    libvlc_media_player_play(mediaPlayer);
-   doPause = 1;
    playerIsInit = true;
+   doPause = 1;
 }
 void VLC::pause()
 {
@@ -49,7 +46,7 @@ void VLC::stop()
 }
 void VLC::next()
 {
-
+    //currently this class doesn't handle tracklists. It's main concern is playback. It just cares about receiving the file location
 }
 void VLC::previous()
 {
@@ -58,7 +55,6 @@ void VLC::previous()
 void VLC::changeTrack(QString path)
 {
     stop();
-    play();
     //qDebug() << libvlc_media_player_get_state(mediaPlayer);
     libvlc_media_t *newMedia = libvlc_media_new_location(instance, ("file:///" + path.toStdString()).c_str() ) ;
     libvlc_media_player_set_media(mediaPlayer, newMedia);
@@ -81,7 +77,6 @@ QMap<QString, QString> VLC::getDevices()
 void VLC::registerEvents()
 {
     eventManager = libvlc_media_player_event_manager(mediaPlayer);
-    // Register the callback
     libvlc_event_attach( eventManager, libvlc_MediaPlayerSnapshotTaken,   callbacks, this );
     libvlc_event_attach( eventManager, libvlc_MediaPlayerTimeChanged,     callbacks, this );
     libvlc_event_attach( eventManager, libvlc_MediaPlayerPlaying,         callbacks, this );
@@ -145,21 +140,21 @@ void VLC::callbacks(const libvlc_event_t* event, void* ptr)
     case libvlc_MediaPlayerForward:
     case libvlc_MediaPlayerBackward:
     default:
-//        qDebug() << "Unknown mediaPlayerEvent: " << event->type;
-        break;
+    //qDebug() << "Unknown mediaPlayerEvent: " << event->type;
+    break;
     }
 }
 void VLC::updateDeviceMap(QMap<QString, QString> &deviceMap)
 {
     deviceMap.clear();
-    libvlc_audio_output_device_t* devices = libvlc_audio_output_device_list_get(instance,"directx");
+    libvlc_audio_output_device_t* devices = libvlc_audio_output_device_list_get(instance,"directx"); //For cross-platform will need check for directx
     while(devices!=NULL)
     {
        deviceMap[devices->psz_description] = devices->psz_device ;
        devices = devices->p_next;
     }
 }
-void VLC::handleDeviceChange(QString device) //For selecting playback device from Audio menu
+void VLC::handleDeviceChange(QString device)
 {
     //QChar whichPlayer = device[0];
     //device = device.remove(0,1);
