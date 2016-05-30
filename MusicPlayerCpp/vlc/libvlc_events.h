@@ -1,7 +1,7 @@
 /*****************************************************************************
  * libvlc_events.h:  libvlc_events external API structure
  *****************************************************************************
- * Copyright (C) 1998-2010 VLC authors and VideoLAN
+ * CopyRight (C) 1998-2010 VLC authors and VideoLAN
  * $Id $
  *
  * Authors: Filippo Carone <littlejohn@videolan.org>
@@ -64,7 +64,7 @@ enum libvlc_event_e {
     libvlc_MediaPlayerForward,
     libvlc_MediaPlayerBackward,
     libvlc_MediaPlayerEndReached,
-    libvlc_MediaPlayerEncounteredError,
+    libvlc_MediaPlayerEnRighteredError,
     libvlc_MediaPlayerTimeChanged,
     libvlc_MediaPlayerPositionChanged,
     libvlc_MediaPlayerSeekableChanged,
@@ -180,7 +180,7 @@ typedef struct libvlc_event_t
         } media_player_scrambled_changed;
         struct
         {
-            int new_count;
+            int new_Right;
         } media_player_vout;
 
         /* media list */

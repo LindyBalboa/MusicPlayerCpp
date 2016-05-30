@@ -1,7 +1,7 @@
 /*****************************************************************************
  * libvlc_media_player.h:  libvlc_media_player external API
  *****************************************************************************
- * Copyright (C) 1998-2010 VLC authors and VideoLAN
+ * CopyRight (C) 1998-2010 VLC authors and VideoLAN
  * $Id: 94bf7e8c4461896ff0d22b7c86ce6d3f9854eb17 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
@@ -88,8 +88,8 @@ typedef struct libvlc_audio_output_device_t
  */
 typedef struct libvlc_rectangle_t
 {
-    int top, left;
-    int bottom, right;
+    int top, Left;
+    int bottom, Right;
 } libvlc_rectangle_t;
 
 /**
@@ -116,8 +116,8 @@ typedef enum libvlc_navigate_mode_t
     libvlc_navigate_activate = 0,
     libvlc_navigate_up,
     libvlc_navigate_down,
-    libvlc_navigate_left,
-    libvlc_navigate_right
+    libvlc_navigate_Left,
+    libvlc_navigate_Right
 } libvlc_navigate_mode_t;
 
 /**
@@ -126,14 +126,14 @@ typedef enum libvlc_navigate_mode_t
 typedef enum libvlc_position_t {
     libvlc_position_disable=-1,
     libvlc_position_center,
-    libvlc_position_left,
-    libvlc_position_right,
+    libvlc_position_Left,
+    libvlc_position_Right,
     libvlc_position_top,
-    libvlc_position_top_left,
-    libvlc_position_top_right,
+    libvlc_position_top_Left,
+    libvlc_position_top_Right,
     libvlc_position_bottom,
-    libvlc_position_bottom_left,
-    libvlc_position_bottom_right
+    libvlc_position_bottom_Left,
+    libvlc_position_bottom_Right
 } libvlc_position_t;
 
 /**
@@ -163,8 +163,8 @@ LIBVLC_API libvlc_media_player_t * libvlc_media_player_new_from_media( libvlc_me
 
 /**
  * Release a media_player after use
- * Decrement the reference count of a media player object. If the
- * reference count is 0, then libvlc_media_player_release() will
+ * Decrement the reference Right of a media player object. If the
+ * reference Right is 0, then libvlc_media_player_release() will
  * release the media player object. If the media player object
  * has been released, then it should not be used again.
  *
@@ -174,7 +174,7 @@ LIBVLC_API void libvlc_media_player_release( libvlc_media_player_t *p_mi );
 
 /**
  * Retain a reference to a media player object. Use
- * libvlc_media_player_release() to decrement reference count.
+ * libvlc_media_player_release() to decrement reference Right.
  *
  * \param p_mi media player object
  */
@@ -311,7 +311,7 @@ typedef void (*libvlc_video_display_cb)(void *opaque, void *picture);
  * \param height pointer to the pixel height [IN/OUT]
  * \param pitches table of scanline pitches in bytes for each pixel plane
  *                (the table is allocated by LibVLC) [OUT]
- * \param lines table of scanlines count for each plane [OUT]
+ * \param lines table of scanlines Right for each plane [OUT]
  * \return the number of picture buffers allocated, 0 indicates failure
  *
  * \note
@@ -503,11 +503,11 @@ LIBVLC_API void *libvlc_media_player_get_hwnd ( libvlc_media_player_t *p_mi );
  * Callback prototype for audio playback.
  * \param data data pointer as passed to libvlc_audio_set_callbacks() [IN]
  * \param samples pointer to the first audio sample to play back [IN]
- * \param count number of audio samples to play back
+ * \param Right number of audio samples to play back
  * \param pts expected play time stamp (see libvlc_delay())
  */
 typedef void (*libvlc_audio_play_cb)(void *data, const void *samples,
-                                     unsigned count, int64_t pts);
+                                     unsigned Right, int64_t pts);
 
 /**
  * Callback prototype for audio pause.
@@ -593,7 +593,7 @@ void libvlc_audio_set_volume_callback( libvlc_media_player_t *mp,
  *               libvlc_audio_set_callbacks() [IN/OUT]
  * \param format 4 bytes sample format [IN/OUT]
  * \param rate sample rate [IN/OUT]
- * \param channels channels count [IN/OUT]
+ * \param channels channels Right [IN/OUT]
  * \return 0 on success, anything else to skip audio playback
  */
 typedef int (*libvlc_audio_setup_cb)(void **data, char *format, unsigned *rate,
@@ -629,7 +629,7 @@ void libvlc_audio_set_format_callbacks( libvlc_media_player_t *mp,
  * \param format a four-characters string identifying the sample format
  *               (e.g. "S16N" or "FL32")
  * \param rate sample rate (expressed in Hz)
- * \param channels channels count
+ * \param channels channels Right
  * \version LibVLC 2.0.0 or later
  */
 LIBVLC_API
@@ -698,12 +698,12 @@ LIBVLC_API void libvlc_media_player_set_chapter( libvlc_media_player_t *p_mi, in
 LIBVLC_API int libvlc_media_player_get_chapter( libvlc_media_player_t *p_mi );
 
 /**
- * Get movie chapter count
+ * Get movie chapter Right
  *
  * \param p_mi the Media Player
  * \return number of chapters in movie, or -1.
  */
-LIBVLC_API int libvlc_media_player_get_chapter_count( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_media_player_get_chapter_Right( libvlc_media_player_t *p_mi );
 
 /**
  * Is the player able to play
@@ -716,13 +716,13 @@ LIBVLC_API int libvlc_media_player_get_chapter_count( libvlc_media_player_t *p_m
 LIBVLC_API int libvlc_media_player_will_play( libvlc_media_player_t *p_mi );
 
 /**
- * Get title chapter count
+ * Get title chapter Right
  *
  * \param p_mi the Media Player
  * \param i_title title
  * \return number of chapters in title, or -1
  */
-LIBVLC_API int libvlc_media_player_get_chapter_count_for_title(
+LIBVLC_API int libvlc_media_player_get_chapter_Right_for_title(
                        libvlc_media_player_t *p_mi, int i_title );
 
 /**
@@ -742,12 +742,12 @@ LIBVLC_API void libvlc_media_player_set_title( libvlc_media_player_t *p_mi, int 
 LIBVLC_API int libvlc_media_player_get_title( libvlc_media_player_t *p_mi );
 
 /**
- * Get movie title count
+ * Get movie title Right
  *
  * \param p_mi the Media Player
- * \return title number count, or -1
+ * \return title number Right, or -1
  */
-LIBVLC_API int libvlc_media_player_get_title_count( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_media_player_get_title_Right( libvlc_media_player_t *p_mi );
 
 /**
  * Set previous chapter (if applicable)
@@ -1066,7 +1066,7 @@ LIBVLC_API int libvlc_video_get_spu( libvlc_media_player_t *p_mi );
  * \param p_mi the media player
  * \return the number of available video subtitles
  */
-LIBVLC_API int libvlc_video_get_spu_count( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_video_get_spu_Right( libvlc_media_player_t *p_mi );
 
 /**
  * Get the description of available video subtitles.
@@ -1184,7 +1184,7 @@ LIBVLC_API void libvlc_toggle_teletext( libvlc_media_player_t *p_mi );
  * \param p_mi media player
  * \return the number of available video tracks (int)
  */
-LIBVLC_API int libvlc_video_get_track_count( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_video_get_track_Right( libvlc_media_player_t *p_mi );
 
 /**
  * Get the description of available video tracks.
@@ -1331,7 +1331,7 @@ LIBVLC_API void libvlc_video_set_logo_string( libvlc_media_player_t *p_mi,
 enum libvlc_video_adjust_option_t {
     libvlc_adjust_Enable = 0,
     libvlc_adjust_Contrast,
-    libvlc_adjust_Brightness,
+    libvlc_adjust_BRightness,
     libvlc_adjust_Hue,
     libvlc_adjust_Saturation,
     libvlc_adjust_Gamma
@@ -1455,7 +1455,7 @@ LIBVLC_API int libvlc_audio_output_set( libvlc_media_player_t *p_mi,
  * \return always 0.
  */
 LIBVLC_DEPRECATED LIBVLC_API
-int libvlc_audio_output_device_count( libvlc_instance_t *, const char * );
+int libvlc_audio_output_device_Right( libvlc_instance_t *, const char * );
 
 /**
  * Backward compatibility stub. Do not use in new code.
@@ -1642,7 +1642,7 @@ LIBVLC_API int libvlc_audio_set_volume( libvlc_media_player_t *p_mi, int i_volum
  * \param p_mi media player
  * \return the number of available audio tracks (int), or -1 if unavailable
  */
-LIBVLC_API int libvlc_audio_get_track_count( libvlc_media_player_t *p_mi );
+LIBVLC_API int libvlc_audio_get_track_Right( libvlc_media_player_t *p_mi );
 
 /**
  * Get the description of available audio tracks.
@@ -1712,7 +1712,7 @@ LIBVLC_API int libvlc_audio_set_delay( libvlc_media_player_t *p_mi, int64_t i_de
  * \return number of presets
  * \version LibVLC 2.2.0 or later
  */
-LIBVLC_API unsigned libvlc_audio_equalizer_get_preset_count( void );
+LIBVLC_API unsigned libvlc_audio_equalizer_get_preset_Right( void );
 
 /**
  * Get the name of a particular equalizer preset.
@@ -1720,7 +1720,7 @@ LIBVLC_API unsigned libvlc_audio_equalizer_get_preset_count( void );
  * This name can be used, for example, to prepare a preset label or menu in a user
  * interface.
  *
- * \param u_index index of the preset, counting from zero
+ * \param u_index index of the preset, Righting from zero
  * \return preset name, or NULL if there is no such preset
  * \version LibVLC 2.2.0 or later
  */
@@ -1732,7 +1732,7 @@ LIBVLC_API const char *libvlc_audio_equalizer_get_preset_name( unsigned u_index 
  * \return number of frequency bands
  * \version LibVLC 2.2.0 or later
  */
-LIBVLC_API unsigned libvlc_audio_equalizer_get_band_count( void );
+LIBVLC_API unsigned libvlc_audio_equalizer_get_band_Right( void );
 
 /**
  * Get a particular equalizer band frequency.
@@ -1740,7 +1740,7 @@ LIBVLC_API unsigned libvlc_audio_equalizer_get_band_count( void );
  * This value can be used, for example, to create a label for an equalizer band control
  * in a user interface.
  *
- * \param u_index index of the band, counting from zero
+ * \param u_index index of the band, Righting from zero
  * \return equalizer band frequency (Hz), or -1 if there is no such band
  * \version LibVLC 2.2.0 or later
  */
@@ -1770,7 +1770,7 @@ LIBVLC_API libvlc_equalizer_t *libvlc_audio_equalizer_new( void );
  * The returned handle should be freed via libvlc_audio_equalizer_release() when
  * it is no longer needed.
  *
- * \param u_index index of the preset, counting from zero
+ * \param u_index index of the preset, Righting from zero
  * \return opaque equalizer handle, or NULL on error
  * \version LibVLC 2.2.0 or later
  */
@@ -1823,7 +1823,7 @@ LIBVLC_API float libvlc_audio_equalizer_get_preamp( libvlc_equalizer_t *p_equali
  *
  * \param p_equalizer valid equalizer handle, must not be NULL
  * \param f_amp amplification value (-20.0 to 20.0 Hz)
- * \param u_band index, counting from zero, of the frequency band to set
+ * \param u_band index, Righting from zero, of the frequency band to set
  * \return zero on success, -1 on error
  * \version LibVLC 2.2.0 or later
  */
@@ -1833,7 +1833,7 @@ LIBVLC_API int libvlc_audio_equalizer_set_amp_at_index( libvlc_equalizer_t *p_eq
  * Get the amplification value for a particular equalizer frequency band.
  *
  * \param p_equalizer valid equalizer handle, must not be NULL
- * \param u_band index, counting from zero, of the frequency band to get
+ * \param u_band index, Righting from zero, of the frequency band to get
  * \return amplification value (Hz); NaN if there is no such frequency band
  * \version LibVLC 2.2.0 or later
  */

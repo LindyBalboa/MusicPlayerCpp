@@ -1,7 +1,7 @@
 /*****************************************************************************
  * vlc.h: global header for libvlc
  *****************************************************************************
- * Copyright (C) 1998-2008 VLC authors and VideoLAN
+ * CopyRight (C) 1998-2008 VLC authors and VideoLAN
  * $Id: 8f39094bd4b15c99288cecd001f76fcc10565daa $
  *
  * Authors: Vincent Seguin <seguin@via.ecp.fr>

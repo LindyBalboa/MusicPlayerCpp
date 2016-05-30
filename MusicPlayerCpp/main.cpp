@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     qDebug() << a.instance()->thread()->currentThreadId();
     MainWindow w;
-    w.show();
+    //w.show();
     a.exec();
 
     return 0;

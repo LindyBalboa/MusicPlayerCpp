@@ -81,22 +81,30 @@ void LibraryTable::mouseMoveEvent(QMouseEvent *event)
         }
     }
 }
-void LibraryTable::changeView(QString oldView, QString newView)
+void LibraryTable::changeView(QString newView)
 {
-    query.prepare("UPDATE Views SET HeaderState=(?) WHERE Name=(?)");
-    query.addBindValue(horizontalHeader()->saveState());
-    query.addBindValue(oldView);
-    query.exec();
-
     query.prepare("SELECT Query, HeaderState FROM Views WHERE Name=(?)");
     query.addBindValue(newView);
     query.exec();
     query.next();
     qDebug() << query.record();
     libraryModel->setSelectStatement(query.value("Query").toString());
-    libraryModel->select();
-    qDebug() << query.value("HeaderState").toByteArray();
+    reselectUpdate();
     horizontalHeader()->restoreState(query.value("HeaderState").toByteArray());  //Does not seem to break if ByteArray empty
+}
+
+void LibraryTable::saveColumnOrder(QString viewName)
+{
+    query.prepare("UPDATE Views SET HeaderState=(?) WHERE Name=(?)");
+    query.addBindValue(horizontalHeader()->saveState());
+    query.addBindValue(viewName);
+    query.exec();
+
+}
+
+void LibraryTable::reselectUpdate()
+{
+    libraryModel->select();
     while(libraryModel->canFetchMore())
     {
         libraryModel->fetchMore();
@@ -118,8 +126,6 @@ LibraryTree::LibraryTree(QSqlDatabase &database, QWidget *parent) : QTreeView(pa
     while(query.next())
     {
         QStandardItem *item = new QStandardItem(query.value(1).toString());  //value(1) = name
-        //item->setData(query.value(2), Qt::UserRole);
-        //item->setData(query.value(3), Qt::UserRole+1);
         rootItem->appendRow(item);
     }
 }
@@ -128,7 +134,7 @@ void LibraryTree::mouseReleaseEvent(QMouseEvent *event)
 {
     if(this->indexAt(event->pos()).isValid())
     {
-        emit newViewClicked(currentView, this->indexAt(event->pos()).data().toString());
+        emit newViewClicked(this->indexAt(event->pos()).data().toString());
     }
     currentView = this->indexAt(event->pos()).data().toString();
     QTreeView::mouseReleaseEvent(event);

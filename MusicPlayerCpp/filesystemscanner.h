@@ -25,7 +25,7 @@ public slots:
 protected:
     QSqlDatabase libraryDb;
     void scanFolders();
-    void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;
+    void closeEvent(QCloseEvent *event) ;
 };
 
 
@@ -37,11 +37,11 @@ public:
     explicit CheckableFileSystemModel(QObject *parent = 0);
     ~CheckableFileSystemModel();
     QModelIndexList checkedList;
-    Qt::ItemFlags flags(const QModelIndex &index) const; Q_DECL_OVERRIDE
-    QVariant data(const QModelIndex &index, int role) const; Q_DECL_OVERRIDE
+    Qt::ItemFlags flags(const QModelIndex &index) const;
+    QVariant data(const QModelIndex &index, int role) const;
 protected:
     QModelIndexList semiList;
-    virtual bool setData(const QModelIndex &index, const QVariant &value, int role); Q_DECL_OVERRIDE
+    virtual bool setData(const QModelIndex &index, const QVariant &value, int role);
 };
 
 class Worker : public QObject

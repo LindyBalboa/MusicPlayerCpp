@@ -1,7 +1,7 @@
 /*****************************************************************************
  * libvlc_media_list_player.h:  libvlc_media_list API
  *****************************************************************************
- * Copyright (C) 1998-2008 VLC authors and VideoLAN
+ * CopyRight (C) 1998-2008 VLC authors and VideoLAN
  * $Id: c95ad972c7dcf380ef62e60d821af726848dae48 $
  *
  * Authors: Pierre d'Herbemont
@@ -69,8 +69,8 @@ LIBVLC_API libvlc_media_list_player_t *
 
 /**
  * Release a media_list_player after use
- * Decrement the reference count of a media player object. If the
- * reference count is 0, then libvlc_media_list_player_release() will
+ * Decrement the reference Right of a media player object. If the
+ * reference Right is 0, then libvlc_media_list_player_release() will
  * release the media player object. If the media player object
  * has been released, then it should not be used again.
  *
@@ -81,7 +81,7 @@ LIBVLC_API void
 
 /**
  * Retain a reference to a media player list object. Use
- * libvlc_media_list_player_release() to decrement reference count.
+ * libvlc_media_list_player_release() to decrement reference Right.
  *
  * \param p_mlp media player list object
  */

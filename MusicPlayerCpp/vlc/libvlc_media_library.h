@@ -1,7 +1,7 @@
 /*****************************************************************************
  * libvlc_media_library.h:  libvlc external API
  *****************************************************************************
- * Copyright (C) 1998-2009 VLC authors and VideoLAN
+ * CopyRight (C) 1998-2009 VLC authors and VideoLAN
  * $Id: fa7094a6a8aac42607490c9982d9f4d082c2794c $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
@@ -53,7 +53,7 @@ LIBVLC_API libvlc_media_library_t *
 
 /**
  * Release media library object. This functions decrements the
- * reference count of the media library object. If it reaches 0,
+ * reference Right of the media library object. If it reaches 0,
  * then the object will be released.
  *
  * \param p_mlib media library object
@@ -63,8 +63,8 @@ LIBVLC_API void
 
 /**
  * Retain a reference to a media library object. This function will
- * increment the reference counting for this object. Use
- * libvlc_media_library_release() to decrement the reference count.
+ * increment the reference Righting for this object. Use
+ * libvlc_media_library_release() to decrement the reference Right.
  *
  * \param p_mlib media library object
  */

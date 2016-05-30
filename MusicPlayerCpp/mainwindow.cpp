@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "filesystemscanner.h"
-#include "librarywidgets.h"
 #include <iostream>
 #include <iterator>
 #include <vlc.h>
@@ -21,6 +20,7 @@
 #include <QVBoxLayout>
 #include <QtMultimedia/QMediaPlayer>
 #include <QtSql>
+#include <QHeaderView>
 
 using namespace std;
 
@@ -32,11 +32,8 @@ MainWindow::MainWindow(QWidget *parent) :
     if (libraryDb.open()){
     }else{
     }
-    QSqlQuery query(libraryDb);
-    query.exec("CREATE TABLE IF NOT EXISTS left(IDNowPlaying INTEGER PRIMARY KEY UNIQUE,"
-                                                "IDSong	INTEGER)");
-    query.exec("CREATE TABLE IF NOT EXISTS right(IDNowPlaying INTEGER PRIMARY KEY UNIQUE,"
-                                                "IDSong	INTEGER)");
+    query = QSqlQuery(libraryDb);
+    buildDatabase();
 
     QWidget *centralWidget = new QWidget;
     centralWidget->setContentsMargins(-10,-10,-10,-10);
@@ -52,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QMenu *fileMenu = menuBar()->addMenu("&File");
         QAction *databaseScanAction = fileMenu->addAction("Add files to Library");
-        connect(databaseScanAction, &QAction::triggered, this, &this->databaseScan);
+        connect(databaseScanAction, &QAction::triggered, this, &this->scanDatabase);
     QMenu *editMenu = menuBar()->addMenu("&Edit");
     QMenu *viewMenu = menuBar()->addMenu("&View");
     QMenu *audioMenu = menuBar()->addMenu("&Audio");
@@ -69,14 +66,15 @@ MainWindow::MainWindow(QWidget *parent) :
     QSplitter *libraryTreeTableSplitter = new QSplitter(centralSplitter);
         libraryTreeTableSplitter->setObjectName("libraryTreeTableSplitter");
         centralSplitter->addWidget(libraryTreeTableSplitter);
-    LibraryTree *libraryTree = new LibraryTree(libraryDb, this);
+    libraryTree = new LibraryTree(libraryDb, this);
         libraryTreeTableSplitter->addWidget(libraryTree);
         libraryTree->setContentsMargins(0,0,-1,0);
         libraryTree->setMinimumWidth(20);
-    LibraryTable *libraryTable = new LibraryTable(libraryDb, this);
+    libraryTable = new LibraryTable(libraryDb, this);
         libraryTreeTableSplitter->addWidget(libraryTable);
         libraryTable->setContentsMargins(-1,0,0,0);
-    connect(libraryTree,&LibraryTree::newViewClicked, libraryTable, &LibraryTable::changeView);
+        connect(libraryTree,&LibraryTree::newViewClicked, libraryTable, &LibraryTable::changeView);
+        connect(libraryTable->horizontalHeader(), &QHeaderView::sectionMoved,[this](int a,int b,int c){this->libraryTable->saveColumnOrder(this->libraryTree->currentView);});
     libraryTreeTableSplitter->setStretchFactor(0,0);
     libraryTreeTableSplitter->setStretchFactor(1,1);
     QList<int> size; size << 100 << 1;
@@ -87,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent) :
     leftPlayer = new PlayerWidget("left", libraryDb);
         playerSplitter->addWidget(leftPlayer);
         leftPlayer->setContentsMargins(0,0,-9,0);
-    rightPlayer = new PlayerWidget("right", libraryDb);
+    rightPlayer = new PlayerWidget("Right", libraryDb);
         playerSplitter->addWidget(rightPlayer);
         rightPlayer->setContentsMargins(-9,0,0,0);
 
@@ -98,8 +96,6 @@ MainWindow::MainWindow(QWidget *parent) :
     progressBar->hide();
 
     //qDebug("Finding AUDIO OUTPUTS and adding to drop down menu dynamically");
-    QMenu* menuRight_Player_Devices;  //Prep to dynamically create device menus after device detection
-    QMenu* menuLeft_Player_Devices;
     QAction* tempAction;
     QActionGroup* rightPlayerDeviceActionGroup = new QActionGroup(this);
     QActionGroup* leftPlayerDeviceActionGroup = new QActionGroup(this);
@@ -121,8 +117,8 @@ MainWindow::MainWindow(QWidget *parent) :
         deviceMenuSignalMapperLeft->setMapping(tempAction,tempAction->text());
         connect(deviceMenuSignalMapperLeft, static_cast<void (QSignalMapper::*)(const QString &)>(&QSignalMapper::mapped),leftPlayer->vlc, &VLC::handleDeviceChange); //Maps all device actions to one handler
     }
-
-
+    this->show();
+    libraryTable->changeView("Music");
 }
 
 MainWindow::~MainWindow()
@@ -141,13 +137,66 @@ void MainWindow::closeEvent(QCloseEvent *event)
     QMainWindow::closeEvent(event);
 }
 
-void MainWindow::databaseScan()
+void MainWindow::scanDatabase()
 {
     scanner = new FileSystemScanner(libraryDb);
-    connect(scanner, &FileSystemScanner::finished, this, &MainWindow::databaseScanFinished);
+    connect(scanner, &FileSystemScanner::finished, this, &MainWindow::scanDatabaseFinished);
     connect(scanner, &FileSystemScanner::totalFileCountSignal, this, &MainWindow::updateScannerTotalFileCount);
     connect(scanner, &FileSystemScanner::currentFileCountSignal, this, &MainWindow::updateScannerCurrentFileCount);
     this->progressBar->show();
+}
+
+void MainWindow::buildDatabase()
+{
+    libraryDb.transaction();
+    query.exec("CREATE TABLE IF NOT EXISTS Songs("
+                                                  "IDSong	INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                                  "Album_Artist	TEXT,"
+                                                  "Album	TEXT,"
+                                                  "Artist	TEXT,"
+                                                  "Bitrate TEXT,"
+                                                  "BPM	INTEGER,"
+                                                  "Channels TEXT,"
+                                                  "Comment	TEXT,"
+                                                  "Competition	INTEGER,"
+                                                  "Composer	TEXT,"
+                                                  "Custom_1	TEXT,"
+                                                  "Custom_2	TEXT,"
+                                                  "Custom_3	TEXT,"
+                                                  "Custom_4	TEXT,"
+                                                  "Custom_5	TEXT,"
+                                                  "Date	TEXT,"
+                                                  "Disc_Number	TEXT,"
+                                                  "Filename	TEXT,"
+                                                  "Genre	TEXT,"
+                                                  "Grouping	TEXT,"
+                                                  "Length	REAL,"
+                                                  "Mood	TEXT,"
+                                                  "Occasion	TEXT,"
+                                                  "Original_Date	TEXT,"
+                                                  "Path	TEXT,"
+                                                  "Play_Count	INTEGER,"
+                                                  "Quality	TEXT,"
+                                                  "Rating	INTEGER,"
+                                                  "Sample_Rate TEXT,"
+                                                  "Tempo	TEXT,"
+                                                  "Title	TEXT,"
+                                                  "Track_Number	TEXT,"
+                                                  "Track_Total	TEXT"
+                                                  ")");
+    query.exec("CREATE TABLE IF NOT EXISTS Views(IDView INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                  "Name	TEXT UNIQUE,"
+                                  "Query TEXT,"
+                                  "HeaderState BLOB,"
+                                  "Visible INTEGER DEFAULT 1 CHECK (Visible=0 OR Visible=1))");
+    query.exec("INSERT OR IGNORE into Views (Name, Query) VALUES ('Music','SELECT * FROM Songs')"
+               "												 ('Left', NULL),"
+               "												 ('Right, NULL)");
+    query.exec("CREATE TABLE IF NOT EXISTS Left(IDNowPlaying INTEGER PRIMARY KEY UNIQUE,"
+                                                "IDSong	INTEGER)");
+    query.exec("CREATE TABLE IF NOT EXISTS Right(IDNowPlaying INTEGER PRIMARY KEY UNIQUE,"
+                                                "IDSong	INTEGER)");
+    libraryDb.commit();
 }
 
 void MainWindow::updateScannerTotalFileCount(int count)
@@ -161,8 +210,9 @@ void MainWindow::updateScannerCurrentFileCount(int count)
     this->progressBar->update();
 }
 
-void MainWindow::databaseScanFinished()
+void MainWindow::scanDatabaseFinished()
 {
     this->progressBar->hide();
     this->progressBar->reset();
+    this->libraryTable->reselectUpdate();
 }

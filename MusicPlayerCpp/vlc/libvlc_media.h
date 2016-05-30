@@ -1,7 +1,7 @@
 /*****************************************************************************
  * libvlc_media.h:  libvlc external API
  *****************************************************************************
- * Copyright (C) 1998-2009 VLC authors and VideoLAN
+ * CopyRight (C) 1998-2009 VLC authors and VideoLAN
  * $Id: 948230a3f17569091b982038ec2c66b48e1a4398 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
@@ -54,7 +54,7 @@ typedef enum libvlc_meta_t {
     libvlc_meta_Title,
     libvlc_meta_Artist,
     libvlc_meta_Genre,
-    libvlc_meta_Copyright,
+    libvlc_meta_CopyRight,
     libvlc_meta_Album,
     libvlc_meta_TrackNumber,
     libvlc_meta_Description,
@@ -343,7 +343,7 @@ LIBVLC_API void libvlc_media_add_option_flag(
 
 /**
  * Retain a reference to a media descriptor object (libvlc_media_t). Use
- * libvlc_media_release() to decrement the reference count of a
+ * libvlc_media_release() to decrement the reference Right of a
  * media descriptor object.
  *
  * \param p_md the media descriptor
@@ -351,8 +351,8 @@ LIBVLC_API void libvlc_media_add_option_flag(
 LIBVLC_API void libvlc_media_retain( libvlc_media_t *p_md );
 
 /**
- * Decrement the reference count of a media descriptor object. If the
- * reference count is 0, then libvlc_media_release() will release the
+ * Decrement the reference Right of a media descriptor object. If the
+ * reference Right is 0, then libvlc_media_release() will release the
  * media descriptor object. It will send out an libvlc_MediaFreed event
  * to all listeners. If the media descriptor object has been released it
  * should not be used again.
@@ -452,8 +452,8 @@ LIBVLC_API int libvlc_media_get_stats( libvlc_media_t *p_md,
 
 /**
  * Get subitems of media descriptor object. This will increment
- * the reference count of supplied media descriptor object. Use
- * libvlc_media_list_release() to decrement the reference counting.
+ * the reference Right of supplied media descriptor object. Use
+ * libvlc_media_list_release() to decrement the reference Righting.
  *
  * \param p_md media descriptor object
  * \return list of media descriptor subitems or NULL
@@ -463,7 +463,7 @@ libvlc_media_subitems( libvlc_media_t *p_md );
 
 /**
  * Get event manager from media descriptor object.
- * NOTE: this function doesn't increment reference counting.
+ * NOTE: this function doesn't increment reference Righting.
  *
  * \param p_md a media descriptor object
  * \return event manager object
@@ -594,11 +594,11 @@ unsigned libvlc_media_tracks_get( libvlc_media_t *p_md,
  * \version LibVLC 2.1.0 and later.
  *
  * \param p_tracks tracks info array to release
- * \param i_count number of elements in the array
+ * \param i_Right number of elements in the array
  */
 LIBVLC_API
 void libvlc_media_tracks_release( libvlc_media_track_t **p_tracks,
-                                  unsigned i_count );
+                                  unsigned i_Right );
 
 /** @}*/
 

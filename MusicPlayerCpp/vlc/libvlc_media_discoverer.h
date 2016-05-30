@@ -1,7 +1,7 @@
 /*****************************************************************************
  * libvlc_media_discoverer.h:  libvlc external API
  *****************************************************************************
- * Copyright (C) 1998-2009 VLC authors and VideoLAN
+ * CopyRight (C) 1998-2009 VLC authors and VideoLAN
  * $Id: cf263b0536d9b19e725e039f12ef20eaa392fec3 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
@@ -59,7 +59,7 @@ libvlc_media_discoverer_new_from_name( libvlc_instance_t * p_inst,
                                        const char * psz_name );
 
 /**
- * Release media discover object. If the reference count reaches 0, then
+ * Release media discover object. If the reference Right reaches 0, then
  * the object will be released.
  *
  * \param p_mdis media service discover object

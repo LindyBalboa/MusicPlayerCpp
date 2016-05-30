@@ -16,17 +16,20 @@ class LibraryTable : public QTableView
     public:
         LibraryTable(QSqlDatabase database, QWidget *parent =0);
         ~LibraryTable();
-        void changeView(QString oldView, QString newView);
+        void changeView(QString newView);
+        void reselectUpdate();
 
         QSqlDatabase libraryDb;
         QSqlQuery query;
+public slots:
+        void saveColumnOrder(QString viewName);
 protected:
         void keyReleaseEvent(QKeyEvent *event);
         LibrarySqlTableModel *libraryModel;
 private:
        QPoint startDragPos;
-       void mousePressEvent(QMouseEvent *event); Q_DECL_OVERRIDE
-       void mouseMoveEvent(QMouseEvent *event); Q_DECL_OVERRIDE
+       void mousePressEvent(QMouseEvent *event);
+       void mouseMoveEvent(QMouseEvent *event);
 };
 
 class LibraryTree : public QTreeView
@@ -35,14 +38,14 @@ class LibraryTree : public QTreeView
 public:
     LibraryTree(QSqlDatabase &database, QWidget *parent=0);
     ~LibraryTree();
+    QString currentView;
 signals:
-    newViewClicked(QString oldView, QString newView);
+    newViewClicked(QString newView);
     requestOptions(QString option);
 private:
-    QString currentView;
 protected:
     QSqlDatabase libraryDb;
-    void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+    void mouseReleaseEvent(QMouseEvent *event) ;
     void contextMenuEvent(QContextMenuEvent *);
     void emitRequestOptions();
 };
@@ -55,15 +58,15 @@ public:
     LibrarySqlTableModel(QWidget *parent = 0, QSqlDatabase database = QSqlDatabase());
     ~LibrarySqlTableModel();
 
-    Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
+    Qt::ItemFlags flags(const QModelIndex &index) const ;
     void setSelectStatement(QString queryString);
 protected:
     QString selectStatementString;
-    QString selectStatement() const Q_DECL_OVERRIDE;
+    QString selectStatement() const ;
 private:
     QItemSelectionModel *_selectionModel;
-    QMimeData* mimeData(const QModelIndexList &indexes) const Q_DECL_OVERRIDE;
-    Qt::DropActions supportedDragActions() const Q_DECL_OVERRIDE;
+    QMimeData* mimeData(const QModelIndexList &indexes) const ;
+    Qt::DropActions supportedDragActions() const ;
 };
 
 #endif // MODELS_H

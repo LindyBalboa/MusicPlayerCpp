@@ -1,7 +1,7 @@
 /*****************************************************************************
  * libvlc.h:  libvlc external API
  *****************************************************************************
- * Copyright (C) 1998-2009 VLC authors and VideoLAN
+ * CopyRight (C) 1998-2009 VLC authors and VideoLAN
  * $Id: 0bc0b401a553d2758abddf6f545022a6c2644405 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
@@ -144,7 +144,7 @@ LIBVLC_API libvlc_instance_t *
 libvlc_new( int argc , const char *const *argv );
 
 /**
- * Decrement the reference count of a libvlc instance, and destroy it
+ * Decrement the reference Right of a libvlc instance, and destroy it
  * if it reaches zero.
  *
  * \param p_instance the instance to destroy
@@ -152,8 +152,8 @@ libvlc_new( int argc , const char *const *argv );
 LIBVLC_API void libvlc_release( libvlc_instance_t *p_instance );
 
 /**
- * Increments the reference count of a libvlc instance.
- * The initial reference count is 1 after libvlc_new() returns.
+ * Increments the reference Right of a libvlc instance.
+ * The initial reference Right is 1 after libvlc_new() returns.
  *
  * \param p_instance the instance to reference
  */
@@ -495,7 +495,7 @@ void libvlc_log_close( libvlc_log_t *p_log );
  * \return always zero
  */
 LIBVLC_DEPRECATED LIBVLC_API
-unsigned libvlc_log_count( const libvlc_log_t *p_log );
+unsigned libvlc_log_Right( const libvlc_log_t *p_log );
 
 /**
  * This function does nothing.
@@ -596,7 +596,7 @@ libvlc_module_description_t *libvlc_audio_filter_list_get( libvlc_instance_t *p_
 LIBVLC_API
 libvlc_module_description_t *libvlc_video_filter_list_get( libvlc_instance_t *p_instance );
 
-/** @} */
+/** @} */
 
 /** \defgroup libvlc_clock LibVLC time
  * These functions provide access to the LibVLC time/clock.
@@ -625,7 +625,7 @@ static inline int64_t libvlc_delay(int64_t pts)
     return pts - libvlc_clock();
 }
 
-/** @} */
+/** @} */
 
 # ifdef __cplusplus
 }

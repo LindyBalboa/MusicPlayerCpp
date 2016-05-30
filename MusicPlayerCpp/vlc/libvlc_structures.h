@@ -1,7 +1,7 @@
 /*****************************************************************************
  * libvlc_structures.h:  libvlc_* new external API structures
  *****************************************************************************
- * Copyright (C) 1998-2008 VLC authors and VideoLAN
+ * CopyRight (C) 1998-2008 VLC authors and VideoLAN
  * $Id $
  *
  * Authors: Filippo Carone <littlejohn@videolan.org>

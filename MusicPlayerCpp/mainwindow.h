@@ -12,6 +12,7 @@
 #include <QSqlDatabase>
 #include <QThread>
 #include <QtMultimedia/QMediaPlayer>
+#include "librarywidgets.h"
 
 class MainWindow : public QMainWindow
 {
@@ -23,23 +24,27 @@ class MainWindow : public QMainWindow
 
         PlayerWidget *leftPlayer;
         PlayerWidget *rightPlayer;
+        LibraryTree *libraryTree;
+        LibraryTable *libraryTable;
 
 public slots:
 protected:
         QProgressBar *progressBar = new QProgressBar();
         QSqlDatabase libraryDb;
+        QSqlQuery query;
         FileSystemScanner *scanner;
         QThread thread;
-        void databaseScanFinished();
-        void updateScannerTotalFileCount(int count);
-        void updateScannerCurrentFileCount(int count);
+        void scanDatabaseFinished();
+        void updateScannerTotalFileCount(int Right);
+        void updateScannerCurrentFileCount(int Right);
 protected slots:
-        void databaseScan();
-        void closeEvent(QCloseEvent *event); Q_DECL_OVERRIDE
+        void scanDatabase();
+        void closeEvent(QCloseEvent *event);
     private:
         std::map <QString, QString> deviceMap;
         QMap<QString,QString> devices;
-    private slots:
+        void buildDatabase();
+private slots:
         void on_pushButton_clicked();
         void on_pushButton_5_clicked();
 

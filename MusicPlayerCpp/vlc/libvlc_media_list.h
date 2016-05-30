@@ -1,7 +1,7 @@
 /*****************************************************************************
  * libvlc_media_list.h:  libvlc_media_list API
  *****************************************************************************
- * Copyright (C) 1998-2008 VLC authors and VideoLAN
+ * CopyRight (C) 1998-2008 VLC authors and VideoLAN
  * $Id: 015824bf54e656cc67838452c7e99a00a452af6e $
  *
  * Authors: Pierre d'Herbemont
@@ -83,7 +83,7 @@ libvlc_media_list_set_media( libvlc_media_list_t *p_ml, libvlc_media_t *p_md );
 
 /**
  * Get media instance from this media list instance. This action will increase
- * the refcount on the media instance.
+ * the refRight on the media instance.
  * The libvlc_media_list_lock should NOT be held upon entering this function.
  *
  * \param p_ml a media list instance
@@ -128,14 +128,14 @@ LIBVLC_API int
 libvlc_media_list_remove_index( libvlc_media_list_t *p_ml, int i_pos );
 
 /**
- * Get count on media list items
+ * Get Right on media list items
  * The libvlc_media_list_lock should be held upon entering this function.
  *
  * \param p_ml a media list instance
  * \return number of items in media list
  */
 LIBVLC_API int
-    libvlc_media_list_count( libvlc_media_list_t *p_ml );
+    libvlc_media_list_Right( libvlc_media_list_t *p_ml );
 
 /**
  * List media instance in media list at a position
@@ -144,7 +144,7 @@ LIBVLC_API int
  * \param p_ml a media list instance
  * \param i_pos position in array where to insert
  * \return media instance at position i_pos, or NULL if not found.
- * In case of success, libvlc_media_retain() is called to increase the refcount
+ * In case of success, libvlc_media_retain() is called to increase the refRight
  * on the media.
  */
 LIBVLC_API libvlc_media_t *

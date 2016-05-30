@@ -25,7 +25,7 @@ class PlaylistModel : public QSqlTableModel
         ~PlaylistModel();
     protected:
         QMimeData *mimeData(const QModelIndexList &indexes) const;
-        virtual QString selectStatement() const; Q_DECL_OVERRIDE
+        virtual QString selectStatement() const;
     private:
         QString _playerSide;
         Qt::ItemFlags flags(const QModelIndex &index) const;
@@ -53,11 +53,11 @@ class PlaylistWidget : public QTableView
         QAbstractItemView::DropIndicatorPosition dropIndicatorPosition;
         QAbstractItemView::DropIndicatorPosition position(const QPoint &pos, const QRect &rect, const QModelIndex &index) const;
         QModelIndex dragHoverIndex;
-        void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
-        void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
-        void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
-        void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-        void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+        void paintEvent(QPaintEvent *event) ;
+        void dragMoveEvent(QDragMoveEvent *event) ;
+        void dragEnterEvent(QDragEnterEvent *event) ;
+        void mousePressEvent(QMouseEvent *event) ;
+        void mouseMoveEvent(QMouseEvent *event) ;
         void dropEvent(QDropEvent *event);
     protected:
         void keyReleaseEvent(QKeyEvent *);

@@ -85,7 +85,7 @@ void VLC::registerEvents()
     libvlc_event_attach( eventManager, libvlc_MediaPlayerEndReached,      callbacks, this );
     libvlc_event_attach( eventManager, libvlc_MediaPlayerPositionChanged, callbacks, this );
     libvlc_event_attach( eventManager, libvlc_MediaPlayerLengthChanged,   callbacks, this );
-    libvlc_event_attach( eventManager, libvlc_MediaPlayerEncounteredError,callbacks, this );
+    libvlc_event_attach( eventManager, libvlc_MediaPlayerEnRighteredError,callbacks, this );
     libvlc_event_attach( eventManager, libvlc_MediaPlayerPausableChanged, callbacks, this );
     libvlc_event_attach( eventManager, libvlc_MediaPlayerSeekableChanged, callbacks, this );
 }
@@ -123,10 +123,10 @@ void VLC::callbacks(const libvlc_event_t* event, void* ptr)
     case libvlc_MediaPlayerSnapshotTaken:
         //self->emit snapshotTaken( event->u.media_player_snapshot_taken.psz_filename );
         break;
-    case libvlc_MediaPlayerEncounteredError:
-        //qDebug() << '[' << (void*)self << "] libvlc_MediaPlayerEncounteredError received."
+    case libvlc_MediaPlayerEnRighteredError:
+        //qDebug() << '[' << (void*)self << "] libvlc_MediaPlayerEnRighteredError received."
          //       << "This is not looking good...";
-        //self->emit errorEncountered();
+        //self->emit errorEnRightered();
         break;
     case libvlc_MediaPlayerSeekableChanged:
         // TODO: Later change it to an event that corresponds volume change, when this thing gets fixed in libvlc

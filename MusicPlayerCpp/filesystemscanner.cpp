@@ -191,41 +191,6 @@ void Worker::doWork()
     flac["Track_Total"] = "TRACKTOTAL";
 
     QSqlQuery query(libraryDb);
-    query.exec("CREATE TABLE IF NOT EXISTS Songs("
-                                                  "IDSong	INTEGER PRIMARY KEY AUTOINCREMENT,"
-                                                  "Album_Artist	TEXT,"
-                                                  "Album	TEXT,"
-                                                  "Artist	TEXT,"
-                                                  "Bitrate TEXT,"
-                                                  "BPM	INTEGER,"
-                                                  "Channels TEXT,"
-                                                  "Comment	TEXT,"
-                                                  "Competition	INTEGER,"
-                                                  "Composer	TEXT,"
-                                                  "Custom_1	TEXT,"
-                                                  "Custom_2	TEXT,"
-                                                  "Custom_3	TEXT,"
-                                                  "Custom_4	TEXT,"
-                                                  "Custom_5	TEXT,"
-                                                  "Date	TEXT,"
-                                                  "Disc_Number	TEXT,"
-                                                  "Filename	TEXT,"
-                                                  "Genre	TEXT,"
-                                                  "Grouping	TEXT,"
-                                                  "Length	REAL,"
-                                                  "Mood	TEXT,"
-                                                  "Occasion	TEXT,"
-                                                  "Original_Date	TEXT,"
-                                                  "Path	TEXT,"
-                                                  "Play_Count	INTEGER,"
-                                                  "Quality	TEXT,"
-                                                  "Rating	INTEGER,"
-                                                  "Sample_Rate TEXT,"
-                                                  "Tempo	TEXT,"
-                                                  "Title	TEXT,"
-                                                  "Track_Number	TEXT,"
-                                                  "Track_Total	TEXT"
-                                                  ")");
     double totalFileCount = 0;
     foreach(QString dir, dirs)
     {

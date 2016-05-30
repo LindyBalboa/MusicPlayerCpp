@@ -14,7 +14,7 @@ PlayerWidget::PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget 
                            QSlider::groove:horizontal {background: lightgray ;\
                                                        height: 2px;\
                                                        position: absolute;\
-                                                       left: 4px; right: 4px;\
+                                                       Left: 4px; Right: 4px;\
                                                        }\
                            QSlider::handle:vertical{ background: #ffffff;\
                                                      border: 1px solid #777;\
