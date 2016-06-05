@@ -13,6 +13,8 @@
 #include <QThread>
 #include <QtMultimedia/QMediaPlayer>
 #include "librarywidgets.h"
+#include "optionswidget.h"
+#include "searchdialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -26,6 +28,7 @@ class MainWindow : public QMainWindow
         PlayerWidget *rightPlayer;
         LibraryTree *libraryTree;
         LibraryTable *libraryTable;
+        OptionsWidget *optionsWidget;
 
 public slots:
 protected:
@@ -43,11 +46,10 @@ protected slots:
     private:
         std::map <QString, QString> deviceMap;
         QMap<QString,QString> devices;
+        SearchDialog *searchDialog;
         void buildDatabase();
+        optionsUpdated();
 private slots:
-        void on_pushButton_clicked();
-        void on_pushButton_5_clicked();
-
 
 };
 

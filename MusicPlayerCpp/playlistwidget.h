@@ -37,7 +37,6 @@ class PlaylistModel : public QSqlTableModel
 class PlaylistWidget : public QTableView
 {
     Q_OBJECT
-
     public:
         PlaylistWidget(QString playerSide, QSqlDatabase &libraryDb,  QWidget *parent = 0);
         PlaylistModel* playlistModel;

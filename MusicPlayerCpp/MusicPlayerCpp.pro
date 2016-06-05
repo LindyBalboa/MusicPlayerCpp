@@ -20,7 +20,9 @@ SOURCES += main.cpp\
     playerwidget.cpp \
     sliderclass.cpp \
     filesystemscanner.cpp \
-    librarywidgets.cpp
+    librarywidgets.cpp \
+    optionswidget.cpp \
+    searchdialog.cpp
 
 HEADERS  += mainwindow.h \
     vlc/vlc.h \
@@ -40,7 +42,10 @@ HEADERS  += mainwindow.h \
     playerwidget.h \
     sliderclass.h \
     filesystemscanner.h \
-    librarywidgets.h
+    librarywidgets.h \
+    optionswidget.h \
+    searchdialog.h \
+    globals.h
 
 FORMS    +=
 

@@ -6,7 +6,7 @@
 #include <vlc.h>
 
 #include <QHBoxLayout>
-#include <QItemDelegate>
+#include <QStyledItemDelegate>
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -44,7 +44,7 @@ public slots:
         void updateSlider(qint32 time);
 };
 
-class PlaylistDelegate : public QItemDelegate
+class PlaylistDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 

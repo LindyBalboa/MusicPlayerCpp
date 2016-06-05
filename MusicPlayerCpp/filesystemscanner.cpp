@@ -52,8 +52,7 @@ FileSystemScanner::FileSystemScanner(QSqlDatabase &db, QWidget *parent) : QWidge
 void FileSystemScanner::scanFolders()
 {
     QStringList dirs;
-    foreach(QModelIndex index, model->checkedList)
-    {
+    foreach(QModelIndex index, model->checkedList){
         dirs << model->filePath(index);
     }
     QThread *workerThread = new QThread();
@@ -78,8 +77,7 @@ CheckableFileSystemModel::CheckableFileSystemModel(QObject *parent) : QFileSyste
 CheckableFileSystemModel::~CheckableFileSystemModel(){}
 QVariant CheckableFileSystemModel::data(const QModelIndex &index, int role) const
 {
-    if (role == Qt::CheckStateRole)
-    {
+    if (role == Qt::CheckStateRole){
        return checkedList.contains(index);
     }
     return QFileSystemModel::data(index, role);
@@ -90,13 +88,10 @@ Qt::ItemFlags CheckableFileSystemModel::flags(const QModelIndex &index) const
 }
 bool CheckableFileSystemModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (role == Qt::CheckStateRole)
-    {
-        if (checkedList.contains(index))
-        {
+    if (role == Qt::CheckStateRole){
+        if (checkedList.contains(index)){
             checkedList.removeAll(index);
-        } else
-        {
+        }else{
             checkedList.append(index);
         }
     }
@@ -192,13 +187,13 @@ void Worker::doWork()
 
     QSqlQuery query(libraryDb);
     double totalFileCount = 0;
-    foreach(QString dir, dirs)
-    {
+    foreach(QString dir, dirs){
         QDirIterator countIter(dir, QDirIterator::Subdirectories);
-        while (countIter.hasNext() )
-        {
+        while (countIter.hasNext() ){
            countIter.next();
-           if (!countIter.fileInfo().isFile()) { continue;}
+           if (!countIter.fileInfo().isFile()){
+               continue;
+           }
            totalFileCount+=1.0;
         }
         emit(totalFileCountSignal(totalFileCount));
@@ -206,34 +201,34 @@ void Worker::doWork()
 
     QStringList existingPaths;
     query.exec("SELECT Path FROM Songs");
-    while(query.next())
-    {
+    while(query.next()){
         existingPaths.append(query.value(0).toString());
     }
     int currentFileCount = 0;
     QStringList skipList;
     skipList << "log" << "jpg" << "peg" << "cue" << "txt" << "m3u" << "md5" << "png" << "gif" << "pdf" << "rip" << "st5" << "tc2" << "nfo" << "sfv" << "ffp" << "ini";
 
-    foreach(QString dir, dirs)
-    {
+    foreach(QString dir, dirs){
         QDirIterator iter(dir, QDirIterator::Subdirectories);
-        while (iter.hasNext())
-        {
+        while (iter.hasNext()){
            iter.next();
-           if (!iter.fileInfo().isFile()) { continue;}
+           if (!iter.fileInfo().isFile()){
+               continue;
+           }
            QString filepath = iter.filePath();
-           if (skipList.contains(filepath.right(3))) { currentFileCount++; continue;}
-           if (existingPaths.contains(filepath))
-           {
+          //qDebug() << filepath;
+           if (skipList.contains(filepath.right(3))) {
+               currentFileCount++;
+               continue;
+           }
+           if (existingPaths.contains(filepath)){
                currentFileCount++;
                continue;  //Skip to next track
            }
            //std::cout << QFile::encodeName(filepath).constData() << endl;
-           if (filepath.right(3) == "mp3" | filepath.right(3) == "MP3")
-           {
+           if (!filepath.right(3).compare("mp3", Qt::CaseInsensitive) ){
                TagLib::MPEG::File f(QFile::encodeName(filepath).constData());
-               if (f.isValid())
-               {
+               if (f.isValid()){
                    TagLib::ID3v2::Tag *id3v2tag = f.ID3v2Tag();
 
                    QString columnsStatement = "insert into Songs (";
@@ -241,16 +236,13 @@ void Worker::doWork()
 
                    TagLib::PropertyMap pm = f.ID3v2Tag()->properties();
                    QMapIterator <QString, TagLib::String> mp3i(mp3);
-                   while (mp3i.hasNext() )
-                   {
+                   while (mp3i.hasNext() ){
                        mp3i.next();
                        //qDebug() << QString::fromStdString(mp3i.key().toStdString()) << ": " << QVariant(pm[mp3i.value().toCString()].toString().toCString());
                        columnsStatement.append(mp3i.key() + ",");
-                       if(pm[mp3i.value().toCString()].toString().size()==0)
-                       {
+                       if(pm[mp3i.value().toCString()].toString().size()==0){
                            valuesStatement.append("'',");
-                       }else
-                           {
+                       }else{
                                valuesStatement.append("'" + QString(pm[mp3i.value().toCString()].toString().toCString()).replace("'","''") + "'" + ",");
                            }
                    }
@@ -271,45 +263,37 @@ void Worker::doWork()
                    valuesStatement.append("'" + QString::number(f.audioProperties()->sampleRate()).replace("'","''") + "'" + ",");
 
                    QString insertStatement = columnsStatement.replace(columnsStatement.size()-1,1,")") + valuesStatement.replace(valuesStatement.size()-1,1,")");
-                   if (!query.exec(insertStatement))
-                   {
-                       qDebug() << insertStatement;
+                   if (!query.exec(insertStatement)){
+                      //qDebug() << insertStatement;
                        std::cout << QFile::encodeName(filepath).constData() << endl;
-                       qDebug() << query.lastError();
+                      //qDebug() << query.lastError();
                    }
-               }
-               else
-               {
+               }else{
                    //std::cout << QFile::encodeName(filepath).constData() << endl;
                }
            }
-           else if (filepath.right(3) == "m4a" | filepath.right(3) == "M4A" | filepath.right(3) == "m4p" | filepath.right(3) == "M4P"| filepath.right(3) == "aac" | filepath.right(3) == "AAC")
-                {
+           else if (!filepath.right(3).compare("m4a", Qt::CaseInsensitive) | !filepath.right(3).compare("mp4", Qt::CaseInsensitive) | !filepath.right(3).compare("aac", Qt::CaseInsensitive)){
                     TagLib::MP4::File f(QFile::encodeName(filepath).constData());
-                    if(f.isValid())
-                    {
+                   //qDebug() << "LOADED";
+                    if(f.isValid()){
+                       //qDebug() << "VALID";
                         TagLib::MP4::Tag *mp4tag = f.tag();
                         TagLib::MP4::ItemMap mp4ItemMap= mp4tag->itemMap();
                         QString columnsStatement = "insert into Songs (";
                         QString valuesStatement = " values (";
                         QMapIterator <QString, TagLib::String> mp4i(mp4);
-                        while (mp4i.hasNext())
-                        {
+                        while (mp4i.hasNext()){
+                           //qDebug() << "WHILE";
                             mp4i.next();
                             TagLib::MP4::Item item = mp4ItemMap[mp4i.value()];
                             columnsStatement.append(mp4i.key() + ",");
-                            if (strlen(item.toStringList().toString().toCString()) != 0)
-                            {
+                            if (strlen(item.toStringList().toString().toCString()) != 0){
                                 valuesStatement.append("'" + QString(item.toStringList().toString().toCString()).replace("'","''") + "'" + ",");
-                                //cout << mp4i.key().toStdString().c_str() << ": " << item.toStringList().toString().toCString() << endl;
-                            }
-                            else if (item.isValid())
-                            {
+                               //qDebug() << "INSIDE IF";
+                            }else if (item.isValid()){
                                 valuesStatement.append("'" + QString::number(item.toInt()).replace("'","''") + "'" + ",");
-                                //cout << mp4i.key().toStdString().c_str() << ": " << item.toInt() << endl;
-                            }
-                            else
-                            {
+                               //qDebug() << mp4i.key().toStdString().c_str() << ": " << item.toInt() << endl;
+                            }else{
                                 valuesStatement.append("'',");
                             }
                         }
@@ -327,40 +311,31 @@ void Worker::doWork()
                         valuesStatement.append("'" + QString::number(f.audioProperties()->sampleRate()).replace("'","''") + "'" + ",");
 
                         QString insertStatement = columnsStatement.replace(columnsStatement.size()-1,1,")") + valuesStatement.replace(valuesStatement.size()-1,1,")");
-                        //qDebug() << insertStatement;
-                        if (!query.exec(insertStatement))
-                        {
+                       //qDebug() << insertStatement;
+                        if (!query.exec(insertStatement)){
                             //std::cout << QFile::encodeName(filepath).constData() << endl;
                             //qDebug() << query.lastError();
                         }
-                    }
-                    else
-                    {
+                       //qDebug() << query.lastQuery();
+                    }else{
                         //std::cout << QFile::encodeName(filepath).constData() << endl;
                     }
-                }
-                else if(filepath.right(4) ==  "flac" | filepath.right(4) == "FLAC")
-                     {
+                }else if(!filepath.right(4).compare("flac", Qt::CaseInsensitive)){
                          TagLib::FLAC::File f(QFile::encodeName(filepath).constData());
-                         if (f.isValid())
-                         {
+                         if (f.isValid()){
                              QString columnsStatement = "insert into Songs (";
                              QString valuesStatement = " values (";
                              TagLib::Ogg::XiphComment *flactag = f.xiphComment();
                              TagLib::Ogg::FieldListMap flacmap = flactag->fieldListMap();
                              QMapIterator <QString, TagLib::String> flaci(flac);
-                             while(flaci.hasNext())
-                             {
+                             while(flaci.hasNext()){
                                  flaci.next();
                                  //cout << flaci.key().toStdString() << ": " << flacmap[flaci.value()].toString() << endl;
                                  columnsStatement.append(flaci.key() + ",");
-                                 if (strlen(flacmap[flaci.value()].toString().toCString()) != 0)
-                                 {
+                                 if (strlen(flacmap[flaci.value()].toString().toCString()) != 0){
                                      valuesStatement.append("'" + QString(flacmap[flaci.value()].toString().toCString()).replace("'","''") + "'" + ",");
                                      //cout << mp4i.key().toStdString().c_str() << ": " << item.toStringList().toString().toCString() << endl;
-                                 }
-                                 else
-                                 {
+                                 }else{
                                      valuesStatement.append("'',");
                                  }
                              }
@@ -378,21 +353,15 @@ void Worker::doWork()
                              valuesStatement.append("'" + QString::number(f.audioProperties()->sampleRate()).replace("'","''") + "'" + ",");
 
                              QString insertStatement = columnsStatement.replace(columnsStatement.size()-1,1,")") + valuesStatement.replace(valuesStatement.size()-1,1,")");
-                             //qDebug() << insertStatement;
-                             if (!query.exec(insertStatement))
-                             {
+                            //qDebug() << insertStatement;
+                             if (!query.exec(insertStatement)){
                                  std::cout << QFile::encodeName(filepath).constData() << endl;
-                                 qDebug() << query.lastError();
+                                //qDebug() << query.lastError();
                              }
-                         }
-                         else
-                         {
+                         }else{
                              //std::cout << QFile::encodeName(filepath).constData() << endl;
                          }
-
-                     }
-                     else
-                     {
+                     }else{
                          //std::cout << QFile::encodeName(filepath).constData() << endl;
                      }
         currentFileCount++;

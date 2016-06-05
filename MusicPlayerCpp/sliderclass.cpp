@@ -11,9 +11,8 @@ SliderClass::~SliderClass()
 }
 
 void SliderClass::mousePressEvent(QMouseEvent * event )
-  {
-    if (event->button() == Qt::LeftButton)
-    {
+{
+    if (event->button() == Qt::LeftButton){
         if (orientation() == Qt::Vertical)
             setValue(minimum() + ((maximum()-minimum()) * (height()-event->y())) / height() ) ;
         else

@@ -5,7 +5,7 @@
 
 PlayerWidget::PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget *parent) : QWidget(parent)
 {
-    //this->setStyleSheet("QSlider::handle:horizontal{ background: #ffffff;\
+    this->setStyleSheet("QSlider::handle:horizontal{ background: #ffffff;\
                                                             border: 1px solid #777;\
                                                             height: 10px;\
                                                             margin: -6px 0px;\
@@ -33,7 +33,7 @@ PlayerWidget::PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget 
 
     QVBoxLayout *centralLayout = new QVBoxLayout();
     setLayout(centralLayout);
-    playlist = new PlaylistWidget(playerSide, libraryDb,this);
+    playlist = new PlaylistWidget(playerSide, libraryDb, this);
         centralLayout->addWidget(playlist);
         connect(playlist, &PlaylistWidget::clicked, this, &trackSingleClicked);
         connect(playlist, &PlaylistWidget::doubleClicked, this, &trackDoubleClicked);
@@ -102,12 +102,10 @@ void PlayerWidget::loadNextTrack() {
     currentPositionLabel->setText("00:00");
     vlc->setPosition(0);
     int i = 0;
-    while (i<=playlist->model()->rowCount() )
-    {
+    while (i<=playlist->model()->rowCount() ){
         QModelIndex index = playlist->model()->index(i,0);  //Loop through the pl_id of every track (how can this be better?
         //qDebug() <<  playlist->currentTrackID << playlist->model()->data(index).toInt();  //If pl_id in loop matches current track, load the very next track. Later for shuffle this belongs in a switch.
-        if (playlist->currentTrackID == playlist->model()->data(index).toInt() )  //If pl_id in loop matches current track, load the very next track. Later for shuffle this belongs in a switch.
-        {
+        if (playlist->currentTrackID == playlist->model()->data(index).toInt() ) { //If pl_id in loop matches current track, load the very next track. Later for shuffle this belongs in a switch.
             index = playlist->model()->index(i+1,0);
             QSqlRecord record = playlist->playlistModel->record(index.row());
             playlist->currentTrackID = record.value("IDNowPlaying").toInt(); //Change to immediate next row
@@ -121,11 +119,9 @@ void PlayerWidget::loadNextTrack() {
 void PlayerWidget::playClicked()
 {
     vlc->setPause();
-    if (this->playButton->text()=="Play")
-    {
+    if (this->playButton->text()=="Play"){
         this->playButton->setText("Pause");
-    }else
-    {
+    }else{
         this->playButton->setText("Play");
     }
 
@@ -144,8 +140,7 @@ void PlayerWidget::positionSliderReleased()
 void PlayerWidget::updateSlider(qint32 currentTime)
 {
     currentPositionLabel->setText(msToTimestamp(currentTime));
-    if (!positionSlider->isSliderDown() )
-    {
+    if (!positionSlider->isSliderDown() ){
         positionSlider->setValue(currentTime);
     }
 }
@@ -161,20 +156,18 @@ void PlayerWidget::trackSingleClicked(const QModelIndex &index)
 {
 }
 
-PlaylistDelegate::PlaylistDelegate(PlaylistWidget *parent) : QItemDelegate(parent)
+PlaylistDelegate::PlaylistDelegate(PlaylistWidget *parent) : QStyledItemDelegate(parent)
 {
     _parent = parent;
 }
 void PlaylistDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    if (index.model()->data(index.model()->index(index.row(),0)).toInt() == _parent->currentTrackID)
-    {
+    if (index.model()->data(index.model()->index(index.row(),0)).toInt() == _parent->currentTrackID){
         QStyleOptionViewItem opt(option);
         opt.font.setBold(true);
-        QItemDelegate::paint(painter,opt,index);
-    }else
-    {
-        QItemDelegate::paint(painter, option, index);
+        QStyledItemDelegate::paint(painter,opt,index);
+    }else{
+        QStyledItemDelegate::paint(painter, option, index);
     }
 }
 
@@ -184,12 +177,10 @@ QString PlayerWidget::msToTimestamp(int ms)
     int m = 0;
     int h = 0;
     s = ms/1000;
-    if (s>60)
-    {
+    if (s>60){
         m = s/60;
         s = s%60;
-        if (m>60)
-        {
+        if (m>60){
             h = m/60;
             m = m%60;
             return QString("%1:%2:%3").arg(h,2,10,QChar('0')).arg(m,2,10,QChar('0')).arg(s,2,10,QChar('0'));

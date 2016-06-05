@@ -8,6 +8,8 @@
 #include <QSqlError>
 #include <QSqlField>
 #include <QSqlResult>
+#include <QStylePainter>
+
 
 PlaylistWidget::PlaylistWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget *parent) : QTableView(parent)
 {
@@ -30,7 +32,7 @@ PlaylistWidget::PlaylistWidget(QString playerSide, QSqlDatabase &libraryDb, QWid
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setDragDropMode(QAbstractItemView::DragDrop);
-    //verticalHeader()->hide();
+    verticalHeader()->hide();
     verticalHeader()->setDefaultSectionSize(15);
     horizontalHeader()->setSectionsMovable(true);
     horizontalHeader()->setFixedHeight(20);
@@ -65,11 +67,9 @@ void PlaylistWidget::dragMoveEvent(QDragMoveEvent *event)
               15\
               );
     dropIndicatorPosition = position(event->pos(), rect, dragHoverIndex);
-    if (dropIndicatorPosition == QAbstractItemView::AboveItem) //***This looks pointless. What purpose?
-    {
+    if (dropIndicatorPosition == QAbstractItemView::AboveItem){ //***This looks pointless. What purpose?
         event->accept();
-    } else if (dropIndicatorPosition == QAbstractItemView::BelowItem)
-    {
+    } else if (dropIndicatorPosition == QAbstractItemView::BelowItem){
         event->accept();
     }
     viewport()->update();
@@ -87,37 +87,28 @@ void PlaylistWidget::dropEvent(QDropEvent *event)
                15\
               );
     dropIndicatorPosition = position(event->pos(), rect, dropIndex);
-        if (dropIndex.row()==-1)
-        {
+        if (dropIndex.row()==-1){
             dropRow = playlistModel->rowCount();
-        }else if (dropIndicatorPosition == QAbstractItemView::AboveItem)
-        {
+        }else if (dropIndicatorPosition == QAbstractItemView::AboveItem){
             dropRow = dropIndex.row();
-        } else if (dropIndicatorPosition == QAbstractItemView::BelowItem)
-        {
+        } else if (dropIndicatorPosition == QAbstractItemView::BelowItem){
            dropRow = dropIndex.row() + 1;
         }
 
-    if (event->source() == this)
-    {
+    if (event->source() == this){
         QModelIndexList selectedIndexesRows = this->selectionModel()->selectedRows();  //return 0 column QModelIndex for each row
         QList<int> selectedRows;
-        foreach(QModelIndex index, selectedIndexesRows)
-        {
+        foreach(QModelIndex index, selectedIndexesRows){
             selectedRows << index.row();
         }
         qSort(selectedRows.begin(), selectedRows.end(), qGreater<int>() );
-        foreach(int row, selectedRows)
-        {
+        foreach(int row, selectedRows){
             playlistModel->playlistIDList.removeAt(row);
-            if (row < dropRow)
-            {
+            if (row < dropRow){
                 dropRow = dropRow - 1;
             }
         }
-    }else
-    {
-
+    }else{
     }
 
     const QMimeData *mimeData = event->mimeData();
@@ -134,8 +125,7 @@ void PlaylistWidget::dropEvent(QDropEvent *event)
 
     playlistModel->select();
     isDragging = false;
-    while(playlistModel->canFetchMore())
-    {
+    while(playlistModel->canFetchMore()){
         playlistModel->fetchMore();
     }
     this->viewport()->update();
@@ -143,20 +133,17 @@ void PlaylistWidget::dropEvent(QDropEvent *event)
 }
 void PlaylistWidget::keyReleaseEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_Delete)  //***Again, if sorted by column in view, this might break
-    {
+    if (event->key() == Qt::Key_Delete) { //***Again, if sorted by column in view, this might break
         _libraryDb.transaction();
         QSqlQuery query(_libraryDb);
         QModelIndexList selectedIndexesRows = this->selectionModel()->selectedRows();  //return 0 column QModelINdex for each row
         QList<int> selectedRows;
-        foreach(QModelIndex index, selectedIndexesRows)
-        {
+        foreach(QModelIndex index, selectedIndexesRows){
             selectedRows << index.row();
         }
         qSort(selectedRows.begin(), selectedRows.end(), qGreater<int>() );
         qDebug() << playlistModel->playlistIDList;
-        foreach(int row, selectedRows)
-        {
+        foreach(int row, selectedRows){
             playlistModel->playlistIDList.removeAt(row);
         }
         qDebug() << playlistModel->playlistIDList;
@@ -167,14 +154,12 @@ void PlaylistWidget::keyReleaseEvent(QKeyEvent *event)
         query.execBatch();
 
         this->playlistModel->select();
-        while(this->playlistModel->canFetchMore())
-        {
+        while(this->playlistModel->canFetchMore()){
             this->playlistModel->fetchMore();
         }
         this->viewport()->update();
         _libraryDb.commit();
-    }else
-    {
+    }else{
         event->ignore();
     }
 }
@@ -186,11 +171,9 @@ void PlaylistWidget::mousePressEvent(QMouseEvent *event)
 
 void PlaylistWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    if (event->buttons() & Qt::LeftButton)
-    {
+    if (event->buttons() & Qt::LeftButton){
         int distance = (event->pos() - startDragPos).manhattanLength();
-        if (distance >= QApplication::startDragDistance())
-        {
+        if (distance >= QApplication::startDragDistance()){
             QDrag *drag = new QDrag(this);
             QModelIndexList selectedRows = this->selectionModel()->selectedRows();
             QMimeData *mimeData = this->model()->mimeData(selectedRows);
@@ -203,29 +186,23 @@ void PlaylistWidget::mouseMoveEvent(QMouseEvent *event)
 void PlaylistWidget::paintEvent(QPaintEvent *event)
 {
     QTableView::paintEvent(event);
-    if (isDragging==true)
-    {
+    if (isDragging==true){
         QPainter qP(viewport());
         QPen pen(Qt::black, 1.5, Qt::SolidLine);
         qP.setPen(pen);
-        if (dragHoverIndex == QModelIndex())
-        {
+        if (dragHoverIndex == QModelIndex()){
             qP.drawLine(0,\
                             rowViewportPosition(playlistModel->rowCount()-1)+15,\
                             viewport()->width(),\
                             rowViewportPosition(playlistModel->rowCount()-1)+15\
                             );
-        }
-        else if(dropIndicatorPosition == QAbstractItemView::AboveItem)
-        {
+        }else if(dropIndicatorPosition == QAbstractItemView::AboveItem){
             qP.drawLine(0,\
                             rowViewportPosition(dragHoverIndex.row()),\
                             viewport()->width(),\
                             rowViewportPosition(dragHoverIndex.row())\
                             );
-        }
-        else if (dropIndicatorPosition == QAbstractItemView::BelowItem)
-        {
+        }else if (dropIndicatorPosition == QAbstractItemView::BelowItem){
             qP.drawLine(0,\
                             rowViewportPosition(dragHoverIndex.row())+15,\
                             viewport()->width(),\
@@ -238,14 +215,11 @@ QAbstractItemView::DropIndicatorPosition PlaylistWidget::position(const QPoint &
 {
     QAbstractItemView::DropIndicatorPosition r;
 
-    if (pos.y() < rect.top()+.5*(rect.bottom()-rect.top()))
-    {
+    if (pos.y() < rect.top()+.5*(rect.bottom()-rect.top())){
         r = QAbstractItemView::AboveItem;
-    } else if (pos.y() >= rect.top()+.5*(rect.bottom()-rect.top()))
-    {
+    } else if (pos.y() >= rect.top()+.5*(rect.bottom()-rect.top())){
         r = QAbstractItemView::BelowItem;
-    } else if (rect.contains(pos, true))
-    {
+    } else if (rect.contains(pos, true)){
         r = QAbstractItemView::OnItem;
     }
 
@@ -258,8 +232,7 @@ PlaylistModel::PlaylistModel(QString playerSide, QWidget *parent, QSqlDatabase l
     setSort(0, Qt::AscendingOrder);
     QSqlQuery query(libraryDb);
     query.exec("SELECT * from " + _playerSide);
-    while(query.next())
-    {
+    while(query.next()){
         playlistIDList.append(query.value(1).toInt());  //Rebuild list from database upon loading
     }
 }
@@ -278,18 +251,14 @@ QMimeData* PlaylistModel::mimeData(const QModelIndexList &indexes) const
     QDataStream stream(&encodedData, QIODevice::WriteOnly);
     QList<int> rows;
     QVariantList IDSongList;
-    foreach (QModelIndex index, indexes)
-    {
-        if (index.isValid())
-        {
-            if (rows.contains(index.row()) == false)
-            {
+    foreach (QModelIndex index, indexes){
+        if (index.isValid()){
+            if (rows.contains(index.row()) == false){
                 rows.append(index.row());
             }
         }
     }
-    for (int i = rows.size()-1; i>=0; i--)
-    {
+    for (int i = rows.size()-1; i>=0; i--){
         IDSongList << this->record(rows[i]).value("IDSong").toInt();
     }
     for(int k = 0; k < (IDSongList.size()/2); k++)

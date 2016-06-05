@@ -41,16 +41,30 @@ MainWindow::MainWindow(QWidget *parent) :
     setGeometry(50,50,600,600);
     setWindowTitle("Title");
 
-    centralWidget->setStyleSheet("QSplitter::handle#libraryTreeTableSplitter {border: 1px solid rgb(240,240,250);"
-                                 "				                              width:  0px;"
-                                 "					                          }"
-                                 "");
+//    this->setStyleSheet("QSplitter::handle#libraryTreeTableSplitter {border: 1px solid rgb(240,240,250);\
+//                                                                              width:  0px;\
+//                                                                              }\
+//                                 QTableView::item::selected::active {color: black;\
+//                                                                     background: qlineargradient(x1:1, y1:1, x2:1, y2:0, stop:0 #E0F0FF, stop:0.85 #E0F0FF, stop:1 white);\
+//                                                                     border-top: 1px solid #A3D1FF;\
+//                                                                     border-bottom: 1px solid #A3D1FF;\
+//                                                                     }\
+//                                 QTableView::item {color: black;}\
+//                  ");
 
+
+    optionsWidget = new OptionsWidget(libraryDb, this);
+    optionsWidget->show();
+
+    searchDialog = new SearchDialog(this);
+    searchDialog->show();
 
     QMenu *fileMenu = menuBar()->addMenu("&File");
         QAction *databaseScanAction = fileMenu->addAction("Add files to Library");
         connect(databaseScanAction, &QAction::triggered, this, &this->scanDatabase);
     QMenu *editMenu = menuBar()->addMenu("&Edit");
+        QAction *optionsAction = editMenu->addAction("Options");
+        connect(optionsAction, &QAction::triggered, [this](){this->optionsWidget->show();});
     QMenu *viewMenu = menuBar()->addMenu("&View");
     QMenu *audioMenu = menuBar()->addMenu("&Audio");
         QMenu *rightPlayerDeviceMenu = audioMenu->addMenu("Right Player Devices");
@@ -70,6 +84,7 @@ MainWindow::MainWindow(QWidget *parent) :
         libraryTreeTableSplitter->addWidget(libraryTree);
         libraryTree->setContentsMargins(0,0,-1,0);
         libraryTree->setMinimumWidth(20);
+        connect(libraryTree, &LibraryTree::requestOptions, [this](QString menu){this->optionsWidget->show();});
     libraryTable = new LibraryTable(libraryDb, this);
         libraryTreeTableSplitter->addWidget(libraryTable);
         libraryTable->setContentsMargins(-1,0,0,0);
@@ -82,10 +97,10 @@ MainWindow::MainWindow(QWidget *parent) :
     QSplitter *playerSplitter = new QSplitter();
         playerSplitter->setContentsMargins(-8,-9,-8,-8);
     centralSplitter->addWidget(playerSplitter);
-    leftPlayer = new PlayerWidget("left", libraryDb);
+    leftPlayer = new PlayerWidget("left", libraryDb, this);
         playerSplitter->addWidget(leftPlayer);
         leftPlayer->setContentsMargins(0,0,-9,0);
-    rightPlayer = new PlayerWidget("Right", libraryDb);
+    rightPlayer = new PlayerWidget("Right", libraryDb, this);
         playerSplitter->addWidget(rightPlayer);
         rightPlayer->setContentsMargins(-9,0,0,0);
 
@@ -103,35 +118,34 @@ MainWindow::MainWindow(QWidget *parent) :
     QSignalMapper *deviceMenuSignalMapperRight = new QSignalMapper(this);
     devices = leftPlayer->vlc->getDevices();
     QMap<QString,QString>::iterator i;  //Build the device menus dynamically
-    for (i = devices.begin(); i != devices.end(); i++)
-    {
+    for (i = devices.begin(); i != devices.end(); i++){
         tempAction = rightPlayerDeviceMenu->addAction(i.key());
         rightPlayerDeviceActionGroup->addAction(tempAction);
-        connect(tempAction,SIGNAL(triggered()),deviceMenuSignalMapperRight, SLOT(map()));
+        connect(tempAction,&QAction::triggered, deviceMenuSignalMapperRight, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
         deviceMenuSignalMapperRight->setMapping(tempAction,tempAction->text());
         connect(deviceMenuSignalMapperRight, static_cast<void (QSignalMapper::*)(const QString &)>(&QSignalMapper::mapped),rightPlayer->vlc, &VLC::handleDeviceChange); //Maps all device actions to one handler
 
         tempAction = leftPlayerDeviceMenu->addAction(i.key());
         leftPlayerDeviceActionGroup->addAction(tempAction);
-        connect(tempAction,SIGNAL(triggered()),deviceMenuSignalMapperLeft, SLOT(map()));
+        connect(tempAction, &QAction::triggered, deviceMenuSignalMapperLeft, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
         deviceMenuSignalMapperLeft->setMapping(tempAction,tempAction->text());
         connect(deviceMenuSignalMapperLeft, static_cast<void (QSignalMapper::*)(const QString &)>(&QSignalMapper::mapped),leftPlayer->vlc, &VLC::handleDeviceChange); //Maps all device actions to one handler
     }
     this->show();
     libraryTable->changeView("Music");
+
+    connect(optionsWidget, &OptionsWidget::finished, this, optionsUpdated);
 }
 
 MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::on_pushButton_clicked()
+MainWindow::optionsUpdated()
 {
+    libraryTree->populateTree();
 }
 
-void MainWindow::on_pushButton_5_clicked()
-{
-}
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     QMainWindow::closeEvent(event);
@@ -184,14 +198,51 @@ void MainWindow::buildDatabase()
                                                   "Track_Number	TEXT,"
                                                   "Track_Total	TEXT"
                                                   ")");
-    query.exec("CREATE TABLE IF NOT EXISTS Views(IDView INTEGER PRIMARY KEY AUTOINCREMENT,"
-                                  "Name	TEXT UNIQUE,"
-                                  "Query TEXT,"
-                                  "HeaderState BLOB,"
-                                  "Visible INTEGER DEFAULT 1 CHECK (Visible=0 OR Visible=1))");
-    query.exec("INSERT OR IGNORE into Views (Name, Query) VALUES ('Music','SELECT * FROM Songs')"
-               "												 ('Left', NULL),"
-               "												 ('Right, NULL)");
+    query.exec("CREATE VIRTUAL TABLE IF NOT EXISTS Search USING fts4("
+                                                  "IDSong	INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                                  "Album_Artist	TEXT,"
+                                                  "Album	TEXT,"
+                                                  "Artist	TEXT,"
+                                                  "Bitrate TEXT,"
+                                                  "BPM	INTEGER,"
+                                                  "Channels TEXT,"
+                                                  "Comment	TEXT,"
+                                                  "Competition	INTEGER,"
+                                                  "Composer	TEXT,"
+                                                  "Custom_1	TEXT,"
+                                                  "Custom_2	TEXT,"
+                                                  "Custom_3	TEXT,"
+                                                  "Custom_4	TEXT,"
+                                                  "Custom_5	TEXT,"
+                                                  "Date	TEXT,"
+                                                  "Disc_Number	TEXT,"
+                                                  "Filename	TEXT,"
+                                                  "Genre	TEXT,"
+                                                  "Grouping	TEXT,"
+                                                  "Length	REAL,"
+                                                  "Mood	TEXT,"
+                                                  "Occasion	TEXT,"
+                                                  "Original_Date	TEXT,"
+                                                  "Path	TEXT,"
+                                                  "Play_Count	INTEGER,"
+                                                  "Quality	TEXT,"
+                                                  "Rating	INTEGER,"
+                                                  "Sample_Rate TEXT,"
+                                                  "Tempo	TEXT,"
+                                                  "Title	TEXT,"
+                                                  "Track_Number	TEXT,"
+                                                  "Track_Total	TEXT"
+                                                  ")");
+    query.exec("CREATE TABLE IF NOT EXISTS Views(IDView INTEGER PRIMARY KEY AUTOINCREMENT,\
+                                                 Name	TEXT UNIQUE,\
+                                                 Query TEXT,\
+                                                 HeaderState BLOB,\
+                                                 Visible INTEGER DEFAULT 1 CHECK (Visible=NULL OR Visible=0 OR Visible=1),\
+                                                 [Order] INTEGER UNIQUE)");
+    query.exec("INSERT OR IGNORE into Views (Name, Query, [Order], Visible) VALUES ('Music','SELECT * FROM Songs',1,1),\
+                                                                 ('Left', NULL, NULL, NULL),\
+                                                                 ('Right', NULL, NULL, NULL)");
+               qDebug() << query.lastError();
     query.exec("CREATE TABLE IF NOT EXISTS Left(IDNowPlaying INTEGER PRIMARY KEY UNIQUE,"
                                                 "IDSong	INTEGER)");
     query.exec("CREATE TABLE IF NOT EXISTS Right(IDNowPlaying INTEGER PRIMARY KEY UNIQUE,"

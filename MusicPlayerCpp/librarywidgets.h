@@ -39,12 +39,14 @@ public:
     LibraryTree(QSqlDatabase &database, QWidget *parent=0);
     ~LibraryTree();
     QString currentView;
+    void populateTree();
 signals:
     newViewClicked(QString newView);
     requestOptions(QString option);
 private:
 protected:
     QSqlDatabase libraryDb;
+        QSqlQuery query;
     void mouseReleaseEvent(QMouseEvent *event) ;
     void contextMenuEvent(QContextMenuEvent *);
     void emitRequestOptions();

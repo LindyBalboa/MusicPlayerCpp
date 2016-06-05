@@ -27,12 +27,13 @@ void VLC::pause()
 }
 void VLC::setPause()
 {
-   if (playerIsInit==true)
-   {
+   if (playerIsInit==true){
        libvlc_media_player_set_pause(mediaPlayer, doPause);
-       if (doPause==0) {doPause=1;} else {doPause=0;}
-   }else
-   {
+       if (doPause==0)
+           doPause=1;
+       else
+           doPause=0;
+   }else{
        libvlc_media_player_play(mediaPlayer);
        playerIsInit = true;
        doPause=1;
@@ -92,8 +93,7 @@ void VLC::registerEvents()
 void VLC::callbacks(const libvlc_event_t* event, void* ptr)
 {
     VLC* self = reinterpret_cast<VLC*>( ptr );
-    switch ( event->type )
-    {
+    switch ( event->type ){
     case libvlc_MediaPlayerPlaying:
         //qDebug() << "Media player playing";
         //self->emit playing();
@@ -148,8 +148,7 @@ void VLC::updateDeviceMap(QMap<QString, QString> &deviceMap)
 {
     deviceMap.clear();
     libvlc_audio_output_device_t* devices = libvlc_audio_output_device_list_get(instance,"directx"); //For cross-platform will need check for directx
-    while(devices!=NULL)
-    {
+    while(devices!=NULL){
        deviceMap[devices->psz_description] = devices->psz_device ;
        devices = devices->p_next;
     }
