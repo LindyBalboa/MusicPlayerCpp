@@ -49,18 +49,18 @@ HEADERS  += mainwindow.h \
 
 FORMS    +=
 
-LIBS += -L"$$_PRO_FILE_PWD_/" -lvlc
-unix|win32: LIBS += -L"$$_PRO_FILE_PWD_/" -ltaglib
+LIBS +=  -lvlc
+LIBS +=  -ltag
 
 OTHER_FILES += database.db
 
-INCLUDEPATH += C:\Users\Conner\Documents\MusicPlayerCpp\MusicPlayerCpp\VLC \
-INCLUDEPATH += "C:/Users/Conner/Documents/MusicPlayerCpp/MusicPlayerCpp/taglib"
+INCLUDEPATH += /home/conner/Source_Builds/MusicPlayerCpp/MusicPlayerCpp/VLC \
+#INCLUDEPATH += "/home/conner/Source_Builds/MusicPlayerCpp/MusicPlayerCpp/taglib"
 
 DISTFILES += \
-    libvlc.lib \
-    libvlc.dll \
-    libvlccore.dll \
+    libvlc.so \
+    libvlc.so \
+    libvlccore.so \
     device_list \
-    libmysql.dll
+    libmysql.so
 

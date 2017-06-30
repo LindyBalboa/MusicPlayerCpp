@@ -3,7 +3,6 @@
 
 #include <QFileSystemModel>
 #include <QModelIndexList>
-#include <QSqlDatabase>
 #include <QThread>
 #include <QWidget>
 
@@ -13,7 +12,7 @@ class FileSystemScanner : public QWidget
 {
     Q_OBJECT
 public:
-    explicit FileSystemScanner(QSqlDatabase &db, QWidget *parent = 0);
+    explicit FileSystemScanner(QWidget *parent = 0);
 
 signals:
     void finished();
@@ -23,7 +22,6 @@ private:
     CheckableFileSystemModel *model;
 public slots:
 protected:
-    QSqlDatabase libraryDb;
     void scanFolders();
     void closeEvent(QCloseEvent *event) ;
 };
@@ -48,11 +46,10 @@ class Worker : public QObject
 {
     Q_OBJECT
 public:
-    explicit Worker(QStringList _dirs, QSqlDatabase &db);
+    explicit Worker(QStringList _dirs);
     ~Worker();
     void doWork();
 private:
-    QSqlDatabase libraryDb;
     QStringList dirs;
 signals:
     int totalFileCountSignal(int totalFileCount);

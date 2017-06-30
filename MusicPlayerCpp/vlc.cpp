@@ -1,5 +1,6 @@
 #include "vlc.h" //header for this file
 #include "vlc/vlc.h" //header that includes all the libvlc.dll required headers
+#include "globals.h"
 #include <QDebug>
 
 VLC::VLC(QObject *parent) : QObject(parent)

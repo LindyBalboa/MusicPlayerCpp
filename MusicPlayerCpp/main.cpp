@@ -1,12 +1,24 @@
+#define DEFINE_GLOBALS
 #include "mainwindow.h"
+#include "globals.h"
 #include <iostream>
-
 #include <QApplication>
 #include <QDebug>
 
+
+
 int main(int argc, char *argv[])
 {
+    libraryDb = QSqlDatabase::addDatabase("QSQLITE");  //This connection gets passed along to any function or class that needs it via reference argument.
+    libraryDb.setDatabaseName("database.db");
+    if (libraryDb.open()){
+    }else{
+    }
+
     QApplication a(argc, argv);
+    a.setApplicationName("Balboa Media Player");
+    a.setOrganizationName("Conner Inc");
+
     a.setStyleSheet("QSplitter::handle#libraryTreeTableSplitter {border: 1px solid rgb(240,240,250);\
                                                                               width:  0px;\
                                                                               }\
@@ -17,7 +29,8 @@ int main(int argc, char *argv[])
                                                          }\
                      QTableView::item                   {color: black;}\
                   ");
-    qDebug() << a.instance()->thread()->currentThreadId();
+
+
     MainWindow w;
     //w.show();
     a.exec();

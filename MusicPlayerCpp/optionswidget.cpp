@@ -1,4 +1,5 @@
 #include "optionswidget.h"
+#include "globals.h"
 #include <QTreeView>
 #include <QStandardItemModel>
 #include <QStandardItem>
@@ -12,14 +13,13 @@
 #include <QCheckBox>
 #include <QApplication>
 
-OptionsWidget::OptionsWidget(QSqlDatabase &database, QWidget *parent, Qt::WindowFlags flags) : QWidget(parent, flags)
+OptionsWidget::OptionsWidget(QWidget *parent, Qt::WindowFlags flags) : QWidget(parent, flags)
 {
     setWindowTitle("Options");
     this->setStyleSheet("QStackedWidget {border-left: 1px solid white;"
                         "				 border-top: 1px solid white;"
                         "				 border-right: 1px solid gray;"
                         "				 border-bottom: 1px solid gray;}");
-    libraryDb = database;
     QVBoxLayout *mainVLayout = new QVBoxLayout(this);
         this->setLayout(mainVLayout);
     QHBoxLayout *treeStackLayout = new QHBoxLayout(this);
@@ -36,13 +36,14 @@ OptionsWidget::OptionsWidget(QSqlDatabase &database, QWidget *parent, Qt::Window
 
         QStackedWidget *stackedWidget = new QStackedWidget(this);
         treeStackLayout->addWidget(stackedWidget);
-        ViewsPanel *viewsPanel = new ViewsPanel(libraryDb, this);
+        ViewsPanel *viewsPanel = new ViewsPanel(this);
         stackedWidget->addWidget(viewsPanel);
+        connect(viewsPanel, &ViewsPanel::requestViewDialog, this, [this](){emit this->requestViewDialog();});
     QHBoxLayout *buttonLayout = new QHBoxLayout(this);
         QPushButton *finishedButton = new QPushButton("Finished");
         finishedButton->setFixedSize(finishedButton->sizeHint());
         buttonLayout->addWidget(finishedButton, 0, Qt::AlignRight);
-        connect(finishedButton, &QPushButton::clicked, this, finishedClicked);
+        connect(finishedButton, &QPushButton::clicked, this, &OptionsWidget::finishedClicked);
     mainVLayout->addLayout(buttonLayout);
 }
 OptionsWidget::~OptionsWidget(){}
@@ -55,9 +56,8 @@ void OptionsWidget::finishedClicked()
     this->hide();
     emit finished();
 }
-ViewsPanel::ViewsPanel(QSqlDatabase &database, QWidget *parent) : QWidget(parent)
+ViewsPanel::ViewsPanel(QWidget *parent) : QWidget(parent)
 {
-    libraryDb = database;
     query = QSqlQuery(libraryDb);
     QVBoxLayout *centralLayout = new QVBoxLayout(this);
     setLayout(centralLayout);
@@ -73,38 +73,35 @@ ViewsPanel::ViewsPanel(QSqlDatabase &database, QWidget *parent) : QWidget(parent
         tableView->verticalHeader()->setDefaultSectionSize(15);
         tableView->horizontalHeader()->setFixedHeight(20);
         tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-        tableView->horizontalHeader()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
-        tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+        //tableView->horizontalHeader()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
+        //tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
         tableView->setSelectionMode(QAbstractItemView::SingleSelection);
         tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     QHBoxLayout * buttonLayout = new QHBoxLayout(this);
         centralLayout->addLayout(buttonLayout);
         QPushButton *addButton = new QPushButton("Add", this);
-        connect(addButton, &QPushButton::clicked, this, addView);
+        connect(addButton, &QPushButton::clicked, [this](){emit this->requestViewDialog();});
         buttonLayout->addWidget(addButton);
         addButton->setFocusPolicy(Qt::TabFocus);
         QPushButton *deleteButton = new QPushButton("Delete", this);
         buttonLayout->addWidget(deleteButton);
-        connect(deleteButton, &QPushButton::clicked, this, deleteView);
+        connect(deleteButton, &QPushButton::clicked, this, &ViewsPanel::deleteView);
         deleteButton->setFocusPolicy(Qt::TabFocus);
         QPushButton *editButton = new QPushButton("Edit", this);
         buttonLayout->addWidget(editButton);
-        connect(editButton, &QPushButton::clicked, this, editView);
+        connect(editButton, &QPushButton::clicked, this, &ViewsPanel::editView);
         editButton->setFocusPolicy(Qt::TabFocus);
         QPushButton *upButton = new QPushButton("Move up", this);
         buttonLayout->addWidget(upButton);
-        connect(upButton, &QPushButton::clicked, this, moveViewUp);
+        connect(upButton, &QPushButton::clicked, this, &ViewsPanel::moveViewUp);
         upButton->setFocusPolicy(Qt::TabFocus);
         QPushButton *downButton = new QPushButton("Move down", this);
         buttonLayout->addWidget(downButton);
-        connect(downButton, &QPushButton::clicked, this, moveViewDown);
+        connect(downButton, &QPushButton::clicked, this, &ViewsPanel::moveViewDown);
         downButton->setFocusPolicy(Qt::TabFocus);
 }
 ViewsPanel::~ViewsPanel(){};
 
-void ViewsPanel::addView(){
-
-}
 void ViewsPanel::deleteView(){
 
 }
@@ -146,7 +143,6 @@ void ViewsPanel::moveViewDown(){
 
 SqlTableModel::SqlTableModel(QObject *parent, QSqlDatabase &database) : QSqlTableModel(parent, database)
 {
-    libraryDb = database;
 }
 SqlTableModel::~SqlTableModel(){};
 QVariant SqlTableModel::data(const QModelIndex &index, int role) const
@@ -175,6 +171,7 @@ bool SqlTableModel::setData(const QModelIndex &index, const QVariant &value, int
         this->select();
         return true;
     }
+    return false;
 }
 Qt::ItemFlags SqlTableModel::flags(const QModelIndex &index) const
 {

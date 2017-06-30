@@ -1,25 +1,25 @@
-#include "Playerwidget.h"
+#include "playerwidget.h"
+#include "globals.h"
 
 #include <QDebug>
 #include <QTime>
 
-PlayerWidget::PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget *parent) : QWidget(parent)
+PlayerWidget::PlayerWidget(QString playerSide, QWidget *parent) : QWidget(parent)
 {
-    this->setStyleSheet("QSlider::handle:horizontal{ background: #ffffff;\
+    /*this->setStyleSheet("QSlider::handle:horizontal{ background: #ffffff;\
                                                             border: 1px solid #777;\
                                                             height: 10px;\
-                                                            margin: -6px 0px;\
+                                                            margin-top: -5px;\
+                                                            margin-bottom: -5px;\
                                                             width: 3px;\
                                                             }\
                            QSlider::groove:horizontal {background: lightgray ;\
                                                        height: 2px;\
                                                        position: absolute;\
-                                                       Left: 4px; Right: 4px;\
                                                        }\
                            QSlider::handle:vertical{ background: #ffffff;\
                                                      border: 1px solid #777;\
                                                      width: 10px;\
-                                                     margin: 0 -6px 0;\
                                                      height: 3px;\
                                                     }\
                            QSlider::groove:vertical {background: lightgray ;\
@@ -28,15 +28,16 @@ PlayerWidget::PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget 
                                                      bottom: 20px;\
                                                      height: 30px;\
                                                     }\
-                          ");
+                          "QSlider {border: 1px solid black;}\
+                          "); */
     vlc = new VLC(this);
 
     QVBoxLayout *centralLayout = new QVBoxLayout();
     setLayout(centralLayout);
-    playlist = new PlaylistWidget(playerSide, libraryDb, this);
+    playlist = new PlaylistWidget(playerSide, this);
         centralLayout->addWidget(playlist);
-        connect(playlist, &PlaylistWidget::clicked, this, &trackSingleClicked);
-        connect(playlist, &PlaylistWidget::doubleClicked, this, &trackDoubleClicked);
+        connect(playlist, &PlaylistWidget::clicked, this, &PlayerWidget::trackSingleClicked);
+        connect(playlist, &PlaylistWidget::doubleClicked, this, &PlayerWidget::trackDoubleClicked);
         PlaylistDelegate *delegate = new PlaylistDelegate(playlist);
         playlist->setItemDelegate(delegate);
 

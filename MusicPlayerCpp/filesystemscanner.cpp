@@ -1,5 +1,6 @@
 #include "filesystemscanner.h"
 
+#include "globals.h"
 #include <QDebug>
 #include <QDir>
 #include <QDirIterator>
@@ -18,7 +19,6 @@
 #include <taglib/commentsframe.h>
 #include <taglib/fileref.h>
 #include <taglib/flacfile.h>
-#include <taglib/flacfile.h>
 #include <taglib/id3v2tag.h>
 #include <taglib/mp4file.h>
 #include <taglib/mp4tag.h>
@@ -28,9 +28,8 @@
 #include <taglib/xiphcomment.h>
 #include <taglib/xiphcomment.h>
 
-FileSystemScanner::FileSystemScanner(QSqlDatabase &db, QWidget *parent) : QWidget(parent)
+FileSystemScanner::FileSystemScanner(QWidget *parent) : QWidget(parent)
 {
-    libraryDb = db;
     setWindowTitle("Scan filesystem for new songs");
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
     setLayout(mainLayout);
@@ -56,7 +55,7 @@ void FileSystemScanner::scanFolders()
         dirs << model->filePath(index);
     }
     QThread *workerThread = new QThread();
-    Worker *worker = new Worker(dirs, libraryDb);
+    Worker *worker = new Worker(dirs);
     worker->moveToThread(workerThread);
     connect(workerThread, &QThread::started, worker, &Worker::doWork);
     connect(worker, &Worker::finished, workerThread, &QThread::quit);
@@ -99,15 +98,15 @@ bool CheckableFileSystemModel::setData(const QModelIndex &index, const QVariant 
     return true;
 }
 
-Worker::Worker(QStringList _dirs, QSqlDatabase &db)
+Worker::Worker(QStringList _dirs)
 {
-    libraryDb = db;
     dirs = _dirs;
 }
 Worker::~Worker(){}
 void Worker::doWork()
 {
-    QMap<QString, TagLib::String> mp3;
+    TagLib::String test;
+    QMap<QString,TagLib::String> mp3;
     mp3["Album"] = "ALBUM"; // "TALB";
     mp3["Album_Artist"] = "ALBUMARTIST"; // "TPE2";
     mp3["Artist"] = "ARTIST"; // "TPE1";
@@ -369,6 +368,7 @@ void Worker::doWork()
         }
         libraryDb.commit();
     }
+    emit finished();
     emit finished();
 }
 

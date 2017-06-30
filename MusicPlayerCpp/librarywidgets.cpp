@@ -1,5 +1,6 @@
 #include <iostream>
 #include <librarywidgets.h>
+#include "globals.h"
 
 #include <QApplication>
 #include <QDrag>
@@ -7,15 +8,18 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QStandardItemModel>
-#include <QStandardItem>
 #include <QMenu>
 #include <QAction>
 
-LibraryTable::LibraryTable(QSqlDatabase database, QWidget *parent) : QTableView(parent)
+/*
+ * Library Table class
+ *
+ * Needs: Should know if it is looking at a search/View or a playlist. Playlists need to be drag droppable
+ */
+LibraryTable::LibraryTable(QWidget *parent) : QTableView(parent)
 {
-    libraryDb = database;
     query = QSqlQuery(libraryDb);
-    libraryModel = new LibrarySqlTableModel(this, libraryDb);
+    libraryModel = new LibrarySqlTableModel(libraryDb, this);
     libraryModel->setTable("Songs");
     setModel(libraryModel);
     while(libraryModel->canFetchMore()){
@@ -75,16 +79,11 @@ void LibraryTable::mouseMoveEvent(QMouseEvent *event)
         }
     }
 }
-void LibraryTable::changeView(QString newView)
+void LibraryTable::changeView(QString queryString, QByteArray headerState)
 {
-    query.prepare("SELECT Query, HeaderState FROM Views WHERE Name=(?)");
-    query.addBindValue(newView);
-    query.exec();
-    qDebug() << query.lastQuery();
-    query.next();
-    libraryModel->setSelectStatement(query.value("Query").toString());
+    libraryModel->setSelectStatement(queryString);
     reselectUpdate();
-    horizontalHeader()->restoreState(query.value("HeaderState").toByteArray());  //Does not seem to break if ByteArray empty
+    //horizontalHeader()->restoreState(headerState);  //Does not seem to break if ByteArray empty
 }
 
 void LibraryTable::saveColumnOrder(QString viewName)
@@ -105,11 +104,12 @@ void LibraryTable::reselectUpdate()
     viewport()->update();
 }
 
-LibraryTree::LibraryTree(QSqlDatabase &database, QWidget *parent) : QTreeView(parent)
+/*
+ * Library Tree class
+ */
+LibraryTree::LibraryTree(QWidget *parent) : QTreeView(parent)
 {
-    libraryDb = database;
     query = QSqlQuery(libraryDb);
-    currentView = "Music";
     QStandardItemModel *model = new QStandardItemModel();
     setModel(model);
     header()->hide();
@@ -118,9 +118,10 @@ LibraryTree::LibraryTree(QSqlDatabase &database, QWidget *parent) : QTreeView(pa
 LibraryTree::~LibraryTree(){}
 void LibraryTree::mouseReleaseEvent(QMouseEvent *event)
 {
-    if(this->indexAt(event->pos()).isValid() & event->button()==Qt::LeftButton){
-        emit newViewClicked(this->indexAt(event->pos()).data().toString());
-        currentView = this->indexAt(event->pos()).data().toString();
+    QModelIndex index = this->indexAt(event->pos());
+    if(index.isValid() & event->button()==Qt::LeftButton){
+        emit newViewClicked(index.data(LibraryTree::QueryRole).toString(),
+                            index.data(LibraryTree::HeaderRole).toByteArray());
     }
     QTreeView::mouseReleaseEvent(event);
 }
@@ -134,17 +135,49 @@ void LibraryTree::contextMenuEvent(QContextMenuEvent *event)
 }
 void LibraryTree::populateTree()
 {
-    QStandardItem *rootItem = static_cast<QStandardItemModel*>(model())->invisibleRootItem();
+    rootItem = static_cast<QStandardItemModel*>(model())->invisibleRootItem();
     rootItem->removeRows(0, rootItem->rowCount());
     query.exec("SELECT * from Views WHERE Visible==1 ORDER BY [Order]");
     while(query.next()){
             QStandardItem *item = new QStandardItem(query.value("Name").toString());  //value(1) = name
+            item->setData(query.value("Query").toString(), LibraryTree::QueryRole);
+            item->setData(query.value("HeaderState").toByteArray(), LibraryTree::HeaderRole);
             rootItem->appendRow(item);
     }
+    /*
+     * to do: add searches to DB
+     */
+    if (searchQueries.size() > 0){
+        QStandardItem *searchItem = new QStandardItem("Searches");
+        rootItem->appendRow(searchItem);
+        foreach(QString queryString, searchQueries){
+            QStandardItem *item = new QStandardItem(queryString);  //value(1) = name
+            item->setData(queryString, LibraryTree::QueryRole);
+            //item->setData(, LibraryTree::HeaderRole);
+            searchItem->appendRow(item);
+        }
+    }
 }
+void LibraryTree::newSearchQuery(QString queryString)
+{
+    if (searchQueries.count()>6){
+        searchQueries.removeFirst();
+    }
 
-
-LibrarySqlTableModel::LibrarySqlTableModel(QWidget *parent, QSqlDatabase libraryDb) : QSqlTableModel(parent, libraryDb)
+    searchQueries << queryString;
+    populateTree();
+    QStandardItem *searchItem = rootItem->child(rootItem->rowCount()-1);
+    QStandardItem *thisSearch = searchItem->child(searchItem->rowCount()-1);
+    emit newViewClicked(thisSearch->data(LibraryTree::QueryRole).toString(),
+                        searchItem->data(LibraryTree::HeaderRole).toByteArray());
+    this->selectionModel()->select(thisSearch->index(), QItemSelectionModel::Select);
+    this->expand(searchItem->index());
+}
+void LibraryTree::newSmartPlaylistQuery(QString query)
+{
+    qDebug() << "new playlist with query:" + query;
+}
+LibrarySqlTableModel::LibrarySqlTableModel(QSqlDatabase libraryDb, QWidget *parent) : QSqlTableModel(parent, libraryDb)
 {
     selectStatementString = "SELECT * from Songs";
 }
@@ -177,9 +210,26 @@ QMimeData* LibrarySqlTableModel::mimeData(const QModelIndexList &indexes) const
 
     return mimeData;
 }
+void LibrarySqlTableModel::setSort(int column, Qt::SortOrder order)
+{
+    sortColumn = column;
+    sortOrder = order;
+}
+QString LibrarySqlTableModel::orderByClause() const
+{
+    QSqlField field = record().field(sortColumn);
+    if (!field.isValid())
+        return QString();
+
+    if (sortOrder == Qt::AscendingOrder){
+        return "ORDER BY " + field.name() + " ASC";
+    } else if (sortOrder == Qt::DescendingOrder){
+        return "ORDER BY " + field.name() + " DESC";
+    }
+}
 QString LibrarySqlTableModel::selectStatement() const
 {
-    return selectStatementString;
+    return selectStatementString + " " + this->orderByClause();
 }
 void LibrarySqlTableModel::setSelectStatement(QString queryString)
 {

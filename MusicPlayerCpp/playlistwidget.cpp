@@ -1,4 +1,5 @@
 #include "playlistwidget.h"
+#include "globals.h"
 #include <QApplication>
 #include <QDebug>
 #include <QDrag>
@@ -11,7 +12,7 @@
 #include <QStylePainter>
 
 
-PlaylistWidget::PlaylistWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget *parent) : QTableView(parent)
+PlaylistWidget::PlaylistWidget(QString playerSide, QWidget *parent) : QTableView(parent)
 {
     _playerSide = playerSide;
     setStyleSheet("QTableView:item:selected:active{\
@@ -22,8 +23,7 @@ PlaylistWidget::PlaylistWidget(QString playerSide, QSqlDatabase &libraryDb, QWid
                   }\
                   ");
 
-    _libraryDb = libraryDb;
-    playlistModel = new PlaylistModel(_playerSide, this, _libraryDb);
+    playlistModel = new PlaylistModel(_playerSide, libraryDb, this);
     playlistModel->setTable(_playerSide);
     setModel(playlistModel);
     playlistModel->select();
@@ -77,7 +77,7 @@ void PlaylistWidget::dragMoveEvent(QDragMoveEvent *event)
 void PlaylistWidget::dropEvent(QDropEvent *event)
 {
     playlistModel->database().transaction();
-    QSqlQuery query(_libraryDb);
+    QSqlQuery query(libraryDb);
     QString exec;
     QModelIndex dropIndex = indexAt(event->pos());
     int dropRow;
@@ -129,13 +129,13 @@ void PlaylistWidget::dropEvent(QDropEvent *event)
         playlistModel->fetchMore();
     }
     this->viewport()->update();
-    _libraryDb.commit();
+    libraryDb.commit();
 }
 void PlaylistWidget::keyReleaseEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Delete) { //***Again, if sorted by column in view, this might break
-        _libraryDb.transaction();
-        QSqlQuery query(_libraryDb);
+        libraryDb.transaction();
+        QSqlQuery query(libraryDb);
         QModelIndexList selectedIndexesRows = this->selectionModel()->selectedRows();  //return 0 column QModelINdex for each row
         QList<int> selectedRows;
         foreach(QModelIndex index, selectedIndexesRows){
@@ -158,7 +158,7 @@ void PlaylistWidget::keyReleaseEvent(QKeyEvent *event)
             this->playlistModel->fetchMore();
         }
         this->viewport()->update();
-        _libraryDb.commit();
+        libraryDb.commit();
     }else{
         event->ignore();
     }
@@ -226,7 +226,7 @@ QAbstractItemView::DropIndicatorPosition PlaylistWidget::position(const QPoint &
     return r;
 }
 
-PlaylistModel::PlaylistModel(QString playerSide, QWidget *parent, QSqlDatabase libraryDb) : QSqlTableModel(parent, libraryDb)
+PlaylistModel::PlaylistModel(QString playerSide, QSqlDatabase libraryDb, QWidget *parent) : QSqlTableModel(parent, libraryDb)
 {
     _playerSide = playerSide;
     setSort(0, Qt::AscendingOrder);

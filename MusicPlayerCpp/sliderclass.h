@@ -13,7 +13,7 @@ class SliderClass : public QSlider
         explicit SliderClass(Qt::Orientation, QWidget *parent = 0);
         ~SliderClass();
     signals:
-        clicked(qint64);
+        void clicked(qint64);
     protected:
         void mousePressEvent(QMouseEvent *event);
 };

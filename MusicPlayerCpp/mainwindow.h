@@ -8,8 +8,8 @@
 #include <QFileSystemModel>
 #include <QMainWindow>
 #include <QProgressBar>
+#include <QSettings>
 #include <QSignalMapper>
-#include <QSqlDatabase>
 #include <QThread>
 #include <QtMultimedia/QMediaPlayer>
 #include "librarywidgets.h"
@@ -33,7 +33,6 @@ class MainWindow : public QMainWindow
 public slots:
 protected:
         QProgressBar *progressBar = new QProgressBar();
-        QSqlDatabase libraryDb;
         QSqlQuery query;
         FileSystemScanner *scanner;
         QThread thread;
@@ -48,7 +47,9 @@ protected slots:
         QMap<QString,QString> devices;
         SearchDialog *searchDialog;
         void buildDatabase();
-        optionsUpdated();
+        void optionsUpdated();
+        void saveSettings();
+        void readSettings();
 private slots:
 
 };

@@ -12,14 +12,14 @@ class OptionsWidget : public QWidget
 {
     Q_OBJECT
 public:
-    OptionsWidget(QSqlDatabase &database, QWidget *parent=0, Qt::WindowFlags flags=Qt::Window);
-    QSqlDatabase libraryDb;
+    OptionsWidget(QWidget *parent=0, Qt::WindowFlags flags=Qt::Window);
     QSqlQuery query;
     ViewsPanel *viewsPanel;
     ~OptionsWidget();
     void finishedClicked();
 signals:
     void finished();
+    QString requestViewDialog(QString mode = "New Smart Playlist");
 protected:
 private:
     virtual void closeEvent(QCloseEvent *event);
@@ -29,13 +29,12 @@ class ViewsPanel : public QWidget
 {
     Q_OBJECT
 public:
-    ViewsPanel(QSqlDatabase &database, QWidget *parent=0);
+    ViewsPanel(QWidget *parent=0);
     ~ViewsPanel();
 
     QSqlTableModel *tableModel;
-    save();
+    void save();
 private:
-    QSqlDatabase libraryDb;
     QSqlQuery query;
     QTableView *tableView;
     void addView();
@@ -43,6 +42,8 @@ private:
     void editView();
     void moveViewUp();
     void moveViewDown();
+signals:
+    QString requestViewDialog(QString mode = "New Smart Playlist");
 };
 
 class SqlTableModel : public QSqlTableModel
@@ -51,8 +52,6 @@ class SqlTableModel : public QSqlTableModel
 public:
     SqlTableModel(QObject *parent, QSqlDatabase &database);
     ~SqlTableModel();
-
-    QSqlDatabase libraryDb;
 private:
     QString selectStatement() const;
     Qt::ItemFlags flags(const QModelIndex &index) const;

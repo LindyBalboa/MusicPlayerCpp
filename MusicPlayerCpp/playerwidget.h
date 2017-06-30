@@ -16,7 +16,7 @@ class PlayerWidget : public QWidget
     Q_OBJECT
 
     public:
-        PlayerWidget(QString playerSide, QSqlDatabase &libraryDb, QWidget *parent = 0);
+        PlayerWidget(QString playerSide, QWidget *parent = 0);
         ~PlayerWidget();
 
         PlaylistWidget *playlist;

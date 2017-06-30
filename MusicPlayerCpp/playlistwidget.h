@@ -8,7 +8,6 @@
 #include <QMimeData>
 #include <QPainter>
 #include <QPoint>
-#include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
 #include <QSqlRecord>
@@ -20,9 +19,9 @@ class PlaylistModel : public QSqlTableModel
     Q_OBJECT
 
     public:
-        QVariantList playlistIDList;
-        PlaylistModel(QString playerSide, QWidget *parent =0, QSqlDatabase playlistDb=QSqlDatabase());
+        PlaylistModel(QString playerSide, QSqlDatabase database, QWidget *parent =0);
         ~PlaylistModel();
+        QVariantList playlistIDList;
     protected:
         QMimeData *mimeData(const QModelIndexList &indexes) const;
         virtual QString selectStatement() const;
@@ -38,7 +37,7 @@ class PlaylistWidget : public QTableView
 {
     Q_OBJECT
     public:
-        PlaylistWidget(QString playerSide, QSqlDatabase &libraryDb,  QWidget *parent = 0);
+        PlaylistWidget(QString playerSide,  QWidget *parent = 0);
         PlaylistModel* playlistModel;
         int currentTrackID;
     public slots:
@@ -46,7 +45,6 @@ class PlaylistWidget : public QTableView
     private:
         QPoint startDragPos;
         bool isDragging = false;
-        QSqlDatabase _libraryDb;
         QSqlDatabase memDb;
         QString _playerSide;
         QAbstractItemView::DropIndicatorPosition dropIndicatorPosition;

@@ -25,9 +25,9 @@ class VLC : public QObject
         void setPosition(qint64 currentTime);
         int getLength();
 signals:
-        endReached();
-        lengthChanged(qint64);
-        timeChanged(qint64);
+        bool endReached();
+        void lengthChanged(qint64);
+        void timeChanged(qint64);
     public slots:
         void handleDeviceChange(QString device);
         void pause();

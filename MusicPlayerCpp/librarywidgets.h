@@ -7,6 +7,7 @@
 #include <Qt>
 #include <QtSql>
 #include <QTreeView>
+#include <QStandardItem>
 
 class LibrarySqlTableModel;
 class LibraryTable : public QTableView
@@ -14,12 +15,11 @@ class LibraryTable : public QTableView
     Q_OBJECT
 
     public:
-        LibraryTable(QSqlDatabase database, QWidget *parent =0);
+        LibraryTable(QWidget *parent =0);
         ~LibraryTable();
-        void changeView(QString newView);
+        void changeView(QString queryString, QByteArray headerState);
         void reselectUpdate();
 
-        QSqlDatabase libraryDb;
         QSqlQuery query;
 public slots:
         void saveColumnOrder(QString viewName);
@@ -32,21 +32,31 @@ private:
        void mouseMoveEvent(QMouseEvent *event);
 };
 
+/*
+ * Library Tree
+ */
 class LibraryTree : public QTreeView
 {
     Q_OBJECT
 public:
-    LibraryTree(QSqlDatabase &database, QWidget *parent=0);
+    LibraryTree(QWidget *parent=0);
     ~LibraryTree();
     QString currentView;
     void populateTree();
+    void newSearchQuery(QString query);
+    void newSmartPlaylistQuery(QString query);
+public slots:
 signals:
-    newViewClicked(QString newView);
-    requestOptions(QString option);
+    void newViewClicked(QString queryString, QByteArray headerState);
+    void requestOptions(QString option);
 private:
+    QStringList searchQueries;
+    enum DataRoles {QueryRole = Qt::UserRole+1,
+                    HeaderRole
+                   };
 protected:
-    QSqlDatabase libraryDb;
-        QSqlQuery query;
+    QSqlQuery query;
+    QStandardItem *rootItem;
     void mouseReleaseEvent(QMouseEvent *event) ;
     void contextMenuEvent(QContextMenuEvent *);
     void emitRequestOptions();
@@ -57,7 +67,7 @@ class LibrarySqlTableModel : public QSqlTableModel
     Q_OBJECT
 
 public:
-    LibrarySqlTableModel(QWidget *parent = 0, QSqlDatabase database = QSqlDatabase());
+    LibrarySqlTableModel(QSqlDatabase database, QWidget *parent = 0);
     ~LibrarySqlTableModel();
 
     Qt::ItemFlags flags(const QModelIndex &index) const ;
@@ -66,9 +76,13 @@ protected:
     QString selectStatementString;
     QString selectStatement() const ;
 private:
+    int sortColumn;
+    Qt::SortOrder sortOrder;
     QItemSelectionModel *_selectionModel;
     QMimeData* mimeData(const QModelIndexList &indexes) const ;
     Qt::DropActions supportedDragActions() const ;
+    void setSort(int column, Qt::SortOrder order);
+    QString orderByClause() const ;
 };
 
 #endif // MODELS_H

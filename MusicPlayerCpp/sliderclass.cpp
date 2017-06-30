@@ -1,4 +1,5 @@
 #include "sliderclass.h"
+#include "globals.h"
 
 SliderClass::SliderClass(Qt::Orientation orientation, QWidget *parent) : QSlider(orientation, parent)
 {
